@@ -9,6 +9,7 @@ setup(name='multiagent',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      install_requires=['gym==0.18.0', 'numpy==1.20.2', 'numpy-stl==2.16.0',
-                        'torch', 'tensorboardX', 'seaborn']
+      install_requires=['gym', 'numpy==1.20.2', 'numpy-stl==2.16.0',
+                        'torch', 'tensorboardX', 'seaborn', 'pyglet',
+                        'imageio']
 )

@@ -1,16 +1,44 @@
-# This is a sample Python script.
+#!/usr/bin/env python
+# fork multiagent-particle-envs from openai and uncomment the following:
+# line 7 in multiagent.multi_discrete.py: # from gym.spaces import prng
+# line 14 in multiagent.rendering.py: # from gym.utils import reraise
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import argparse
+from robot.robot_policy import RobotPolicy
+from robot.robot_environment import RobotEnv
+# import multiagent.scenarios as scenarios
+import robot.robot_scenarios as scenarios
 
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    # parse arguments
+    parser = argparse.ArgumentParser(description=None)
+    parser.add_argument('-s', '--scenario', default='robotarm.py', help='Path of the scenario Python script.')
+    args = parser.parse_args()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # load scenario from script
+    scenario = scenarios.load(args.scenario).Scenario()
+    # create world
+    world = scenario.make_world()
+    # create multiagent environment
+    env = RobotEnv(world, scenario.reset_world, scenario.reward, scenario.observation, info_callback=None,
+                        shared_viewer=True)
+    # render call to create viewer window (necessary only for interactive policies)
+    env.render()
+    # create interactive policies for each agent
+    policies = [RobotPolicy(env, i) for i in range(env.n)]
+    # execution loop
+    obs_n = env.reset()
+    while True:
+        # query for action from each agent's policy
+        act_n = []
+        for i, policy in enumerate(policies):
+            act_n.append(policy.action(obs_n[i]))
+        # step environment
+        obs_n, reward_n, done_n, _ = env.step(act_n)
+        # render all agent view
+        env.render()
+        # display rewards
+        for agent in env.world.agents:
+           print(agent.name + " reward: %0.3f" % env._get_reward(agent))
+
+
