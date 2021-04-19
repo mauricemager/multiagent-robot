@@ -1,0 +1,2 @@
+Succesfull runs
+robotarm test 11: 2 agents, eps_length = 250, episodes = 2500

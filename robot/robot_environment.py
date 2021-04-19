@@ -111,7 +111,6 @@ class RobotEnv(MultiAgentEnv):
                     self.render_geoms.append(gripper)
 
                 elif 'object' in entity.name:
-                    # geom = rendering.make_polygon(self.create_object_points(entity))
                     geom = rendering.make_polygon(entity.create_object_points())
                     geom.set_color(*entity.color)
                     self.render_geoms.append(geom)

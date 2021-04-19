@@ -95,7 +95,7 @@ class Robotworld(World):
         #
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 75
+        self.step_size = math.pi / 25
 
     @property
     def entities(self):
@@ -132,4 +132,9 @@ class Robotworld(World):
                          r * math.sin(phi * i + math.pi)] for i in range(n)]
             return position
 
-
+    def random_object_pos(self):
+        # sample random object position from uniform distribution
+        dist = np.random.random_sample() * self.arm_length * self.num_joints
+        angle = np.random.random_sample() * 2 * math.pi
+        random_pos = dist * np.array([math.cos(angle), math.sin(angle)])
+        return random_pos

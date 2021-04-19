@@ -30,8 +30,7 @@ def make_env(scenario_name, benchmark=False, discrete_action=False):
         .n                  :   Returns the number of Agents
     '''
     from multiagent.environment import MultiAgentEnv
-    # import multiagent.scenarios as scenarios
-    import robot.robot_scenarios as scenarios
+    import multiagent.scenarios as scenarios
 
     # load scenario from script
     scenario = scenarios.load(scenario_name + ".py").Scenario()
