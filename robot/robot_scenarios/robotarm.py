@@ -9,6 +9,9 @@ class Scenario(BaseScenario):
         # define scenario properties
         num_agents = 2
         num_objects = 1
+        num_joints = 2
+        arm_length = 0.35
+
         # create world
         world = Robotworld()
 
@@ -32,6 +35,9 @@ class Scenario(BaseScenario):
             goal.name = 'goal'
             goal.collide = False
             goal.movable = False
+
+        world.num_joints = num_joints
+        world.arm_length = arm_length
 
         # reset world
         self.reset_world(world)

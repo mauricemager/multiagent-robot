@@ -78,7 +78,6 @@ class RobotEnv(MultiAgentEnv):
                     message += (other.name + ' to ' + agent.name + ': ' + word + '   ')
             # print(message)
 
-
         for i in range(len(self.viewers)):
             # create viewers (if necessary)
             if self.viewers[i] is None:
@@ -114,9 +113,20 @@ class RobotEnv(MultiAgentEnv):
                     geom = rendering.make_polygon(entity.create_object_points())
                     geom.set_color(*entity.color)
                     self.render_geoms.append(geom)
-                else:
+
+                elif 'goal' in entity.name:
                     geom = rendering.make_polygon(entity.create_goal_points())
                     self.render_geoms.append(geom)
+
+                elif 'end_pos' in entity.name:
+                    geom = rendering.make_polyline(entity.create_robot_points(shorter_end=True))
+                    geom.set_color(*entity.color, alpha=0.5)
+                    geom.set_linewidth(5)
+                    gripper = rendering.make_polyline(entity.create_gripper_points(gripped=entity.state.grasp))
+                    gripper.set_color(*entity.color, alpha=0.5)
+                    gripper.set_linewidth(5)
+                    self.render_geoms.append(geom)
+                    self.render_geoms.append(gripper)
 
             for viewer in self.viewers:
                 viewer.geoms = []

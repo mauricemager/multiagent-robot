@@ -12,7 +12,7 @@ import robot.robot_scenarios as scenarios
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-s', '--scenario', default='simple_robot.py', help='Path of the scenario Python script.')
+    parser.add_argument('-s', '--scenario', default='simple_test.py', help='Path of the scenario Python script.')
     args = parser.parse_args()
 
     # load scenario from script
@@ -35,10 +35,15 @@ if __name__ == '__main__':
             act_n.append(policy.action(obs_n[i]))
         # step environment
         obs_n, reward_n, done_n, _ = env.step(act_n)
+        # print(f'observation_n = {obs_n}')
+        # print(f'reward = {reward_n}')
+        print(f"Theta agent = {env.world.agents[0].state.angles}"
+              f"and Theta goal = {env.world.goals[0].state.angles}"
+              f"and reward = {env._get_reward(env.world.agents[0])}")
         # render all agent view
         env.render()
         # display rewards
-        for agent in env.world.agents:
-           print(agent.name + " reward: %0.3f" % env._get_reward(agent))
+        # for agent in env.world.agents:
+           # print(agent.name + " reward: %0.3f" % env._get_reward(agent))
 
 
