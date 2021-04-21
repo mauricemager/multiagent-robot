@@ -10,6 +10,6 @@ setup(name='multiagent',
       include_package_data=True,
       zip_safe=False,
       install_requires=['gym', 'numpy==1.20.2', 'numpy-stl==2.16.0',
-                        'torch', 'tensorboardX', 'seaborn', 'pyglet',
+                        'torch', 'tensorboardX', 'seaborn', 'pyglet=1.3.2',
                         'imageio']
 )

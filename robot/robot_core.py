@@ -122,6 +122,7 @@ class Robotworld(World):
         # adjust the position of the object when manipulated by robot
         if (agent.within_reach(object) == True) and (agent.state.grasp == True):
             object.state.p_pos = agent.position_end_effector()
+            # object.state.angles = agent.state.angles[0] # This works only for the simple_grab scenario
 
     def robot_position(self, n, r=0.5):
         # determine robot's origin position for different configurations

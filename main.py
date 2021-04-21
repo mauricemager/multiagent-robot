@@ -36,10 +36,13 @@ if __name__ == '__main__':
         # step environment
         obs_n, reward_n, done_n, _ = env.step(act_n)
         # print(f'observation_n = {obs_n}')
-        # print(f'reward = {reward_n}')
-        print(f"Theta agent = {env.world.agents[0].state.angles}"
-              f"and Theta goal = {env.world.goals[0].state.angles}"
-              f"and reward = {env._get_reward(env.world.agents[0])}")
+        # print(f"goal angles = {world.goals[0].state.angles}"
+        #       f" and agent angle = {world.agents[0].state.angles}"
+        #       f" reward = {reward_n}")
+        print(f'reward = {reward_n}')
+        # print(f"Theta agent = {env.world.agents[0].state.angles}"
+        #       f"and Theta goal = {env.world.goals[0].state.angles}"
+        #       f"and reward = {env._get_reward(env.world.agents[0])}")
         # render all agent view
         env.render()
         # display rewards

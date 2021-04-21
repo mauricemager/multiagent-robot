@@ -8,8 +8,9 @@ class Scenario(BaseScenario):
         # define scenario properties
         num_agents = 1
         num_objects = 1
-        num_joints = 2
+        num_joints = 1
         arm_length = 0.35
+
         # create world
         world = Robotworld()
 
@@ -30,6 +31,7 @@ class Scenario(BaseScenario):
         for i, goal in enumerate(world.goals):
             goal.name = 'goal'
 
+        # add world specifications
         world.num_joints = num_joints
         world.arm_length = arm_length
 
@@ -46,41 +48,33 @@ class Scenario(BaseScenario):
             agent.state.angles = (2 * np.random.rand(world.num_joints) - 1) * math.pi
             agent.state.p_pos = np.array(origins[i][:])
 
-        # set properties for objects
+        # set properties for object
         for i, object in enumerate(world.objects):
-            object.color = np.array([0, 0, 1])
-            object.state.p_pos = world.random_object_pos()
+            object.color = np.array([0, 0, 0])
+            object.state.angles = (2 * np.random.rand() - 1) * math.pi
+            object.state.p_pos = world.arm_length * np.array([math.cos(object.state.angles),
+                                                              math.sin(object.state.angles)])
 
         # set properties for goal
-        world.goals[0].state.p_pos = world.random_object_pos()
+        for i, goal in enumerate(world.goals):
+            goal.color = np.array([1, 0, 0])
+            goal.state.angles = (2 * np.random.rand() - 1) * math.pi
+            goal.state.p_pos = world.arm_length * np.array([math.cos(goal.state.angles),
+                                                            math.sin(goal.state.angles)])
 
-    def reward(self, agent, world):
+    def reward(self, agent, world): # make suitable for multiple objects
+        # reward = np.absolute(world.goals[0].state.angles - world.objects[0].state.angles) % math.pi
         reward = 0.0
-        for object in world.objects:
-            dist2 = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos))
-            reward += dist2
+        for i in range(len(agent.state.p_pos)):
+            reward += (world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i]) ** 2
         return -reward
 
     def observation(self, agent, world):
         # initialize observation variables
-        state_observations = (agent.state.angles / math.pi).tolist() + [agent.state.grasp]
-        goal_observation = world.goals[0].state.p_pos.tolist()
-        object_pos = []
-        partners = []
-        # fill in object observation for every object in the environment
-        for object in world.objects:
-            # determine relative distance to every object in the environment
-            dist = np.sum(np.square(object.state.p_pos - agent.position_end_effector()))
-            object_pos += [dist]
-        # when partner agents available, obtain their information
-        if len(world.agents) > 1:
-            for partner in world.agents:
-                # only for partner agents
-                if agent.name != partner.name:
-                    # determine relative distance to other agent's end effector
-                    diff = partner.position_end_effector() - agent.position_end_effector()
-                    partners += [np.linalg.norm(diff)] + [partner.state.grasp]
-        # combine observations to a single numpy array
-        return state_observations + object_pos + partners + goal_observation
+        state_observations = (agent.state.angles / math.pi).tolist()
+        # state_observations = agent.position_end_effector().tolist()
+        goal_observation = [world.goals[0].state.angles / math.pi]
+        # goal_observation = world.goals[0].state.p_pos.tolist()
+        return state_observations + goal_observation
 
 

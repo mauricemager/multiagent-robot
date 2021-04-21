@@ -69,13 +69,14 @@ if __name__ == '__main__':
     parser.add_argument("model_name",
                         help="Name of model")
     parser.add_argument("run_num", default=1, type=int)
-    parser.add_argument("--save_gifs", action="store_true",
+    parser.add_argument("--save_gifs", default=True,
+                        action="store_true",
                         help="Saves gif of each episode into model directory")
     parser.add_argument("--incremental", default=None, type=int,
                         help="Load incremental policy from given episode " +
                              "rather than final policy")
     parser.add_argument("--n_episodes", default=10, type=int)
-    parser.add_argument("--episode_length", default=300, type=int)
+    parser.add_argument("--episode_length", default=150, type=int)
     parser.add_argument("--fps", default=30, type=int)
 
     config = parser.parse_args()

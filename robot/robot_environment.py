@@ -90,7 +90,7 @@ class RobotEnv(MultiAgentEnv):
         for i in range(len(self.viewers)):
             from multiagent import rendering
             # update bounds to center around agent
-            cam_range = 1
+            cam_range = 0.5
             if self.shared_viewer:
                 pos = np.zeros(self.world.dim_p)
             else:
@@ -103,7 +103,8 @@ class RobotEnv(MultiAgentEnv):
                     geom = rendering.make_polyline(entity.create_robot_points(shorter_end=True))
                     geom.set_color(*entity.color, alpha=0.5)
                     geom.set_linewidth(5)
-                    gripper = rendering.make_polyline(entity.create_gripper_points(gripped=entity.state.grasp))
+                    # gripper = rendering.make_polyline(entity.create_gripper_points(gripped=entity.state.grasp))
+                    gripper = rendering.make_polyline(entity.create_gripper_points(gripped=False))
                     gripper.set_color(*entity.color, alpha=0.5)
                     gripper.set_linewidth(5)
                     self.render_geoms.append(geom)
@@ -116,6 +117,7 @@ class RobotEnv(MultiAgentEnv):
 
                 elif 'goal' in entity.name:
                     geom = rendering.make_polygon(entity.create_goal_points())
+                    geom.set_color(*entity.color)
                     self.render_geoms.append(geom)
 
                 elif 'end_pos' in entity.name:
