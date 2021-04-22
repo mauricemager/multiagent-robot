@@ -77,7 +77,7 @@ class Robot(Agent):
         # give the position of the end effector
         return np.array(self.create_robot_points()[-1])
 
-    def within_reach(self, object, grasp_range=0.06):
+    def within_reach(self, object, grasp_range=0.15):
         # test whether and object is within grasping range for a robot
         end_pos = np.array(self.position_end_effector())
         obj_pos = np.array(object.state.p_pos)
@@ -95,7 +95,7 @@ class Robotworld(World):
         #
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 75
+        self.step_size = math.pi / 15
 
     @property
     def entities(self):
