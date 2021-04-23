@@ -72,12 +72,19 @@ class Robot(Agent):
         points = np.array(points) + [self.position_end_effector()]
         return points
 
+    def get_joint_pos(self, joint): # returns a numpy array of pos
+        if joint == 0: return self.state.p_pos
+        angle = self.state.angles.cumsum()[joint-1] # cumsum because of relative angle definition
+        pos = self.get_joint_pos(joint-1) + self.state.lengths[joint-1] * np.array([np.cos(angle), np.sin(angle)])
+        # print(f" joint: {joint} gives pos: {pos}")
+        # print(f" angles are: {self.state.angles}")
+        return pos
 
     def position_end_effector(self):
         # give the position of the end effector
         return np.array(self.create_robot_points()[-1])
 
-    def within_reach(self, object, grasp_range=0.15):
+    def within_reach(self, object, grasp_range=0.1):
         # test whether and object is within grasping range for a robot
         end_pos = np.array(self.position_end_effector())
         obj_pos = np.array(object.state.p_pos)
@@ -95,7 +102,7 @@ class Robotworld(World):
         #
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 15
+        self.step_size = math.pi / 25
 
     @property
     def entities(self):
@@ -115,7 +122,7 @@ class Robotworld(World):
             if agent.state.angles[i] > math.pi: agent.state.angles[i] -= 2 * math.pi
             elif agent.state.angles[i] <= -math.pi: agent.state.angles[i] += 2 * math.pi
         # activate gripper when last action element == 1.0
-        if agent.action.u[-1] > 0: agent.state.grasp = 1.0
+        if agent.action.u[self.num_joints] > 0: agent.state.grasp = 1.0
         else: agent.state.grasp = 0.0
 
     def update_object_state(self, agent, object):

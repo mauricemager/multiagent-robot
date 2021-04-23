@@ -44,7 +44,7 @@ class MultiAgentEnv(gym.Env):
             if self.discrete_action_space:
                 u_action_space = spaces.Discrete(world.dim_p * 2 + 1)
             else:
-                u_action_space = spaces.Box(low=-agent.u_range, high=+agent.u_range, shape=(world.dim_p,), dtype=np.float32)
+                u_action_space = spaces.Box(low=-agent.u_range, high=+agent.u_range, shape=(world.dim_p + 1,), dtype=np.float32)
             if agent.movable:
                 total_action_space.append(u_action_space)
             # communication action space

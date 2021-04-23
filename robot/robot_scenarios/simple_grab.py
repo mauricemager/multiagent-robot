@@ -8,7 +8,7 @@ class Scenario(BaseScenario):
         # define scenario properties
         num_agents = 1
         num_objects = 1
-        num_joints = 2
+        num_joints = 1
         arm_length = 0.35
 
         # create world

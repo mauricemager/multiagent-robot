@@ -12,7 +12,7 @@ import robot.robot_scenarios as scenarios
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-s', '--scenario', default='simple_grab.py', help='Path of the scenario Python script.')
+    parser.add_argument('-s', '--scenario', default='simple_robot.py', help='Path of the scenario Python script.')
     args = parser.parse_args()
 
     # load scenario from script
@@ -36,6 +36,10 @@ if __name__ == '__main__':
         # step environment
         obs_n, reward_n, done_n, _ = env.step(act_n)
         print(f'observation_n = {obs_n}')
+        # print(f" joint0 pos = {type(world.agents[0].get_joint_pos(0))}"
+        #       f" joint1 pos = {world.agents[0].get_joint_pos(1)}"
+        #       f" joint2 pos = {world.agents[0].get_joint_pos(2)}")
+
         # print(f"goal angles = {world.goals[0].state.angles}"
         #       f" and agent angle = {world.agents[0].state.angles}"
         #       f" reward = {reward_n}")
