@@ -58,6 +58,13 @@ class Scenario(BaseScenario):
         world.goals[0].color = np.array([1, 0, 0])
 
     def reward(self, agent, world):
+        # # reward = 0.0
+        # for object in world.objects: # dit gaat alleen goed voor 1 object anders overwrite hij
+        #     object_dist = np.sum(np.square(agent.state.p_pos - object.state.p_pos)) # check of dit goed gaat
+        #     goal_dist = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos)) # check of dit goed gaat
+        # reward += object_dist + 1.5 * goal_dist
+        # return -reward
+
         # reward = 0.0
         # for object in world.objects:
         #     dist2 = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos))

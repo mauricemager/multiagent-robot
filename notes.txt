@@ -1,4 +1,5 @@
-Succesfull runs
-robotarm test 11: 2 agents, eps_length = 250, episodes = 2500
-simple_test 13: 1 agent, 1 arm, eps_length_train = 150, no further improvement sinds n_episodes = 2k
-    single arm can go to given position and go over omslagpunt
+Experiments with robotarm scenario
+
+Run4: Cooperative reward, 15k runs, terminated at 12k runs
+slow training, seems to stagnate at reward = -3
+bad result, random actions and does not seem to pick up object

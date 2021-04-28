@@ -65,11 +65,28 @@ class Scenario(BaseScenario):
         # world.goals[0].state.p_vel = np.zeros(world.dim_p)
 
     def reward(self, agent, world):
+        # reward = 0.0 # reward not collective !!
+        # print(f" test agent.state.p_pos = {type(agent.state.p_pos)} and object.state.p_pos = {world.objects[0].state.p_pos}")
+        # for object in world.objects: # dit gaat alleen goed voor 1 object anders overwrite hij
+        #     object_dist = np.sum(np.square(agent.state.p_pos - object.state.p_pos)) # check of dit goed gaat
+        #     goal_dist = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos)) # check of dit goed gaat
+        #     print(f"agent {agent.name} has object_dist {object_dist} and goal_dist {goal_dist}")
+        # reward = object_dist + 1.5 * goal_dist
+        # return -reward
+
         reward = 0.0
-        for object in world.objects:
-            dist2 = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos))
-            reward += dist2
+        for agent in world.agents:
+            reward += np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
+        reward += 2 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
         return -reward
+
+        # reward = 0.0
+        #
+        # #
+        # # for object in world.objects:
+        # #     dist2 = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos))
+        # #     reward += dist2
+        # return -reward
 
     def observation(self, agent, world):
         # initialize observation variables
