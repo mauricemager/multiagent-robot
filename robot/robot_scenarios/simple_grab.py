@@ -50,7 +50,7 @@ class Scenario(BaseScenario):
 
         # set properties for object
         for i, object in enumerate(world.objects):
-            object.color = np.array([0, 0, 0])
+            object.color = np.array([0, 0, 1])
             object.state.angles = (2 * np.random.rand() - 1) * math.pi
             object.state.p_pos = world.arm_length * np.array([math.cos(object.state.angles),
                                                               math.sin(object.state.angles)])
@@ -98,7 +98,7 @@ class Scenario(BaseScenario):
         if r_goal > 1: r_goal = 2 - r_goal
         # print(f"theta_obj = {theta_obj}, r_grab = {r_grab} and "
         #       f"theta_goal = {theta_goal}, r_goal = {r_goal}")
-        return  - r_goal
+        return   -r_grab - 2 * r_goal
 
     def observation(self, agent, world):
         # initialize observation variables

@@ -58,6 +58,17 @@ class Scenario(BaseScenario):
         world.goals[0].color = np.array([1, 0, 0])
 
     def reward(self, agent, world):
+        r_grab = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
+        r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        return -r_grab - 2 * r_goal
+
+        #
+        # for agent in world.agents:
+        #     reward += np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
+        # reward += 2 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # return -reward
+        #
+
         # # reward = 0.0
         # for object in world.objects: # dit gaat alleen goed voor 1 object anders overwrite hij
         #     object_dist = np.sum(np.square(agent.state.p_pos - object.state.p_pos)) # check of dit goed gaat
@@ -72,17 +83,17 @@ class Scenario(BaseScenario):
         # return -reward
 
         # Cartesian reward signal distances
-        r_grab, r_goal = 0.0, 0.0
-        for i in range(len(agent.state.p_pos)):
-            r_grab += np.square(world.objects[0].state.p_pos[i] - agent.get_joint_pos(world.num_joints)[i])
-            # print(f"agent.get_joint_pos(world.num_joints) = {agent.get_joint_pos(world.num_joints)}")
-            # print(f"position_end_effector(self) = {agent.position_end_effector()}")
-            r_goal += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
-            # reward += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
-        # print(f"sample: np.sqrt(r_grab) = {- np.sqrt(r_grab)}  "
-        #       f" and np.sqrt(r_goal) = {-np.sqrt(r_goal)}")
-        # reward = np.sqrt(r_grab) + np.sqrt(r_goal)
-        return - np.sqrt(r_grab) - 1.5 * np.sqrt(r_goal)
+        # r_grab, r_goal = 0.0, 0.0
+        # for i in range(len(agent.state.p_pos)):
+        #     r_grab += np.square(world.objects[0].state.p_pos[i] - agent.get_joint_pos(world.num_joints)[i])
+        #     # print(f"agent.get_joint_pos(world.num_joints) = {agent.get_joint_pos(world.num_joints)}")
+        #     # print(f"position_end_effector(self) = {agent.position_end_effector()}")
+        #     r_goal += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
+        #     # reward += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
+        # # print(f"sample: np.sqrt(r_grab) = {- np.sqrt(r_grab)}  "
+        # #       f" and np.sqrt(r_goal) = {-np.sqrt(r_goal)}")
+        # # reward = np.sqrt(r_grab) + np.sqrt(r_goal)
+        # return - np.sqrt(r_grab) - 1.5 * np.sqrt(r_goal)
 
 
 

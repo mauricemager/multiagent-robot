@@ -117,6 +117,7 @@ class RobotEnv(MultiAgentEnv):
 
                 elif 'goal' in entity.name:
                     geom = rendering.make_polygon(entity.create_goal_points())
+                    # geom = rendering.make_circle(radius=0.05)
                     geom.set_color(*entity.color)
                     self.render_geoms.append(geom)
 
@@ -125,6 +126,7 @@ class RobotEnv(MultiAgentEnv):
                     geom.set_color(*entity.color, alpha=0.5)
                     geom.set_linewidth(5)
                     gripper = rendering.make_polyline(entity.create_gripper_points(gripped=entity.state.grasp))
+                    # gripper = rendering.make_polyline(entity.create_gripper_points(gripped=False))
                     gripper.set_color(*entity.color, alpha=0.5)
                     gripper.set_linewidth(5)
                     self.render_geoms.append(geom)

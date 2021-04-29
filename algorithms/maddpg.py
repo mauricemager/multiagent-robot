@@ -76,6 +76,7 @@ class MADDPG(object):
         Outputs:
             actions: List of actions for each agent
         """
+        # print(f" are we exploring ? {explore}")
         return [a.step(obs, explore=explore) for a, obs in zip(self.agents,
                                                                  observations)]
 
@@ -101,8 +102,9 @@ class MADDPG(object):
                 all_trgt_acs = [onehot_from_logits(pi(nobs)) for pi, nobs in
                                 zip(self.target_policies, next_obs)]
             else:
-                all_trgt_acs = [pi(nobs) for pi, nobs in zip(self.target_policies,
-                                                             next_obs)]
+                # all_trgt_acs = [torch.normal(pi(nobs)[:,0:3],pi(nobs)[:,3:6]) for pi, nobs in zip(self.target_policies, next_obs)]
+                all_trgt_acs = [pi(nobs) for pi, nobs in zip(self.target_policies, next_obs)]
+                # all_trgt_acs = [torch.normal(*torch.split(pi(nobs), 3, dim=1)) for pi, nobs in zip(self.target_policies, next_obs)]
             trgt_vf_in = torch.cat((*next_obs, *all_trgt_acs), dim=1)
         else:  # DDPG
             if self.discrete_action:
@@ -128,7 +130,7 @@ class MADDPG(object):
         vf_loss.backward()
         if parallel:
             average_gradients(curr_agent.critic)
-        torch.nn.utils.clip_grad_norm(curr_agent.critic.parameters(), 0.5)
+        torch.nn.utils.clip_grad_norm_(curr_agent.critic.parameters(), 0.5)
         curr_agent.critic_optimizer.step()
 
         curr_agent.policy_optimizer.zero_grad()
@@ -148,10 +150,14 @@ class MADDPG(object):
             all_pol_acs = []
             for i, pi, ob in zip(range(self.nagents), self.policies, obs):
                 if i == agent_i:
+                    # all_pol_acs.append(torch.normal(curr_pol_vf_in[:,0:3],curr_pol_vf_in[:,3:6]))
+                    # all_pol_acs.append(torch.normal(*torch.split(curr_pol_vf_in, 3, dim=1)))
                     all_pol_acs.append(curr_pol_vf_in)
                 elif self.discrete_action:
                     all_pol_acs.append(onehot_from_logits(pi(ob)))
                 else:
+                    # all_pol_acs.append(torch.normal(pi(ob)[:,0:3],pi(ob)[:,3:6]))
+                    # all_pol_acs.append(torch.normal(*torch.split(pi(ob), 3, dim=1)))
                     all_pol_acs.append(pi(ob))
             vf_in = torch.cat((*obs, *all_pol_acs), dim=1)
         else:  # DDPG
@@ -162,7 +168,7 @@ class MADDPG(object):
         pol_loss.backward()
         if parallel:
             average_gradients(curr_agent.policy)
-        torch.nn.utils.clip_grad_norm(curr_agent.policy.parameters(), 0.5)
+        torch.nn.utils.clip_grad_norm_(curr_agent.policy.parameters(), 0.5)
         curr_agent.policy_optimizer.step()
         if logger is not None:
             logger.add_scalars('agent%i/losses' % agent_i,
@@ -248,6 +254,7 @@ class MADDPG(object):
                 discrete_action = True
                 get_shape = lambda x: x.n
             num_out_pol = get_shape(acsp)
+            # num_out_pol = get_shape(acsp) * 2
             if algtype == "MADDPG":
                 num_in_critic = 0
                 for oobsp in env.observation_space:

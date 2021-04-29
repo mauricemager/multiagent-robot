@@ -55,17 +55,12 @@ class Scenario(BaseScenario):
         world.goals[0].state.angles = (2 * np.random.rand(world.num_joints) - 1) * math.pi
 
     def reward(self, agent, world):
-        # reward = 0.0
-        # for i in range(world.num_joints):
-        #     # ang_g = world.goals[0].state.angles[i]
-        #     # ang_a = agent.state.angles[i]
-        #     # reward += np.square(math.cos(ang_g) - math.cos(ang_a)) + np.square(math.sin(ang_g) - math.sin(ang_a))
-        #     reward += np.absolute(world.goals[0].state.angles[i] - agent.state.angles[i])
-        #     if reward > math.pi: reward = 2 * math.pi - reward
-        reward = 0.0
-        for i in range(len(agent.state.p_pos)):
-            reward += np.square(agent.position_end_effector()[i] - world.goals[0].position_end_effector()[i])
+        # reward is based on polar difference between the agent and goal position in domain [0, 3.14]
+        reward = np.absolute(world.goals[0].state.angles[0] - agent.state.angles[0])
+        # reward based on least distance to goal position
+        if reward > math.pi: reward = 2 * math.pi - reward
         return -reward
+
 
     def observation(self, agent, world):
         # initialize observation variables

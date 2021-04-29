@@ -1,5 +1,10 @@
-Experiments with robotarm scenario
+Succesfull experiments after sampling actions from distribution given by network
 
-Run4: Cooperative reward, 15k runs, terminated at 12k runs
-slow training, seems to stagnate at reward = -3
-bad result, random actions and does not seem to pick up object
+------------------------- simple_test -------------------------
+experiment3, run3, 5k runs, final smoothened rew = -0.29 but still improving
+gifs show perfect results!
+
+
+------------------------- simple_grab -------------------------
+april29, run1, 5k runs, final smoothened rew = -0.29, rew = r_grab + r_goal
+run2, 10k runs, final rew = -0.48 , rew = r_grab + 1.5 * r_goal
