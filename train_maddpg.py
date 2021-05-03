@@ -2,6 +2,7 @@ import argparse
 import torch
 import time
 import os
+import imageio
 import numpy as np
 from gym.spaces import Box, Discrete
 from pathlib import Path
@@ -12,6 +13,8 @@ from make_env import make_env
 from utils.buffer import ReplayBuffer
 from utils.env_wrappers import SubprocVecEnv, DummyVecEnv
 from algorithms.maddpg import MADDPG
+from subprocess import Popen
+import webbrowser
 
 USE_CUDA = torch.cuda.is_available()
 
@@ -27,6 +30,44 @@ def make_parallel_env(env_id, n_rollout_threads, seed, discrete_action):
         return DummyVecEnv([get_env_fn(0)])
     else:
         return SubprocVecEnv([get_env_fn(i) for i in range(n_rollout_threads)])
+
+
+def run_evaluation(config, ep_i, gif_path, ifi, maddpg):
+    print(f'Evaluating episode {ep_i + 1}...')
+    env = make_env(config.env_id, discrete_action=maddpg.discrete_action)
+    obs = env.reset()
+    if config.save_gifs:
+        frames = []
+        frames.append(env.render('rgb_array')[0])
+    env.render('human')
+    for t_i in range(config.episode_length):
+        calc_start = time.time()
+        # rearrange observations to be per agent, and convert to torch Variable
+        torch_obs = [Variable(torch.Tensor(obs[i]).view(1, -1),
+                              requires_grad=False)
+                     for i in range(maddpg.nagents)]
+        # get actions as torch Variables
+        torch_actions = maddpg.step(torch_obs, explore=False)
+        # convert actions to numpy arrays
+        actions = [ac.data.numpy().flatten() for ac in torch_actions]
+        obs, rewards, dones, infos = env.step(actions)
+        if config.save_gifs:
+            frames.append(env.render('rgb_array')[0])
+        calc_end = time.time()
+        elapsed = calc_end - calc_start
+        if elapsed < ifi:
+            time.sleep(ifi - elapsed)
+        env.render('human')
+    if config.save_gifs:
+        gif_num = 0
+        while (gif_path / ('%i_%i.gif' % (gif_num, ep_i))).exists():
+            gif_num += 1
+        imageio.mimsave(str(gif_path / ('%i_%i.gif' % (gif_num, ep_i))),
+                        frames, duration=ifi)
+        # imageio.core.format.Reader.close()
+        env.viewers[0].close()
+        env.close()
+
 
 def run(config):
     model_dir = Path('./models') / config.env_id / config.model_name
@@ -47,6 +88,11 @@ def run(config):
     # os.makedirs(rew_dir)
     logger = SummaryWriter(str(log_dir))
 
+    if config.save_gifs:
+        gif_path = run_dir / 'gifs'
+        gif_path.mkdir(exist_ok=True)
+    ifi = 1 / config.fps  # inter-frame interval
+
     torch.manual_seed(config.seed)
     np.random.seed(config.seed)
     if not USE_CUDA:
@@ -65,6 +111,20 @@ def run(config):
                                  [acsp.shape[0] if isinstance(acsp, Box) else acsp.n
                                   for acsp in env.action_space])
     t = 0
+
+    # start up tensorboard
+    cmd = "tensorboard --logdir='models/" + config.env_id + "/" + config.model_name + "/" + curr_run + "/logs'"
+    Popen(cmd, shell=True)
+    url = 'http://localhost:6012/' # still have to manually change this
+
+    evaluation_eps = []
+    if config.n_evaluations != 0:
+        # create a list of evaluation episodes dependent on configuration
+        interval = int(config.n_episodes / config.n_rollout_threads / config.n_evaluations)
+        evaluation_eps = list(range(0, config.n_episodes, config.n_rollout_threads))
+        evaluation_eps = evaluation_eps[-1:0:-interval]
+
+
     for ep_i in range(0, config.n_episodes, config.n_rollout_threads):
         print("Episodes %i-%i of %i" % (ep_i + 1,
                                         ep_i + 1 + config.n_rollout_threads,
@@ -95,6 +155,7 @@ def run(config):
             if (len(replay_buffer) >= config.batch_size and
                 (t % config.steps_per_update) < config.n_rollout_threads):
                 if USE_CUDA:
+                    # print(f'now training at ep_i = {ep_i} and et_i = {et_i}')
                     maddpg.prep_training(device='gpu')
                 else:
                     maddpg.prep_training(device='cpu')
@@ -120,10 +181,28 @@ def run(config):
             maddpg.save(run_dir / 'incremental' / ('model_ep%i.pt' % (ep_i + 1)))
             maddpg.save(run_dir / 'model.pt')
 
+        # if (ep_i/config.n_rollout_threads) % rel_interval == rel_interval - 1:
+        #     run_evaluation(config, ep_i, gif_path, ifi, maddpg)
+        #     print(f'this is ep_i = {ep_i}')
+
+        if ep_i in evaluation_eps:
+            run_evaluation(config, ep_i, gif_path, ifi, maddpg)
+            print(f'this is ep_i = {ep_i}')
+
+        # show tensorboard in browser
+        if ep_i == config.save_interval:
+            webbrowser.open_new_tab(url)
+
+
+
+
     maddpg.save(run_dir / 'model.pt')
     env.close()
     logger.export_scalars_to_json(str(log_dir / 'summary.json'))
     logger.close()
+
+
+
 
 
 if __name__ == '__main__':
@@ -138,16 +217,16 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=30000, type=int)
+    parser.add_argument("--n_episodes", default=100, type=int)
     parser.add_argument("--episode_length", default=100, type=int)
-    parser.add_argument("--steps_per_update", default=200, type=int)
+    parser.add_argument("--steps_per_update", default=100, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=30000, type=int)
+    parser.add_argument("--n_exploration_eps", default=5000, type=int)
     parser.add_argument("--init_noise_scale", default=1.0, type=float)
-    parser.add_argument("--final_noise_scale", default=0.2, type=float)
-    parser.add_argument("--save_interval", default=1000, type=int)
+    parser.add_argument("--final_noise_scale", default=1.0, type=float)
+    parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
     parser.add_argument("--lr", default=0.01, type=float)
     parser.add_argument("--tau", default=0.01, type=float)
@@ -159,6 +238,13 @@ if __name__ == '__main__':
                         choices=['MADDPG', 'DDPG'])
     parser.add_argument("--discrete_action",
                         action='store_true')
+    # add for evaluation
+    parser.add_argument("--save_gifs", default=True,
+                        action="store_true",
+                        help="Saves gif of each episode into model directory")
+    parser.add_argument("--n_evaluations", default=0, type=int)
+    parser.add_argument("--fps", default=30, type=int)
+    # parser.add_argument("--eval", default=True, type=bool)
 
     config = parser.parse_args()
 

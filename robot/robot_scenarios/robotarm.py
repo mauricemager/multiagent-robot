@@ -64,6 +64,7 @@ class Scenario(BaseScenario):
 
         # world.goals[0].state.p_vel = np.zeros(world.dim_p)
 
+
     def reward(self, agent, world):
         # reward = 0.0 # reward not collective !!
         # print(f" test agent.state.p_pos = {type(agent.state.p_pos)} and object.state.p_pos = {world.objects[0].state.p_pos}")
@@ -102,12 +103,12 @@ class Scenario(BaseScenario):
         if len(world.agents) > 1:
             for partner in world.agents:
                 # only for partner agents
-                if agent.name != partner.name:
-                    # partner state observations
-                    for i in range(world.num_joints + 1):
-                        partner_obs += partner.get_joint_pos(i).tolist()
-                    # add partner grasp observation
-                    partner_obs += [partner.state.grasp]
+                if agent.name == partner.name: continue
+                # partner state observations
+                for i in range(world.num_joints + 1):
+                    partner_obs += partner.get_joint_pos(i).tolist()
+                # add partner grasp observation
+                partner_obs += [partner.state.grasp]
         # update goal observation
         goal_obs = world.goals[0].state.p_pos.tolist()
 

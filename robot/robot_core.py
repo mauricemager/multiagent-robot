@@ -109,7 +109,8 @@ class Robotworld(World):
         return self.agents + self.objects + self.goals
 
     def step(self):
-        for agent in self.agents:
+        for i, agent in enumerate(self.agents):
+            # if i == 0: continue
             self.update_agent_state(agent)
             for object in self.objects: # TODO: limit to only one grabbing a object
                 self.update_object_state(agent, object)
