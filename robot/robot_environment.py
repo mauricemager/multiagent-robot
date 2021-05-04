@@ -116,9 +116,12 @@ class RobotEnv(MultiAgentEnv):
                     self.render_geoms.append(geom)
 
                 elif 'goal' in entity.name:
-                    geom = rendering.make_polygon(entity.create_goal_points())
+                    # geom = rendering.make_polygon(entity.create_goal_points())
+                    geom = rendering.make_polygon(entity.create_goal_points2())
+                    # print(f'type test = {type(geom)}')
+                    # print(f'test points= {entity.create_goal_points2()}')
                     # geom = rendering.make_circle(radius=0.05)
-                    geom.set_color(*entity.color)
+                    geom.set_color(*entity.color, alpha=0.5)
                     self.render_geoms.append(geom)
 
                 elif 'end_pos' in entity.name:

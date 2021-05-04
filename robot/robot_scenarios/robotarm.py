@@ -53,10 +53,10 @@ class Scenario(BaseScenario):
             # agent.state.angles = (np.array([0.0,0.5])) * math.pi
             agent.state.p_pos = np.array(origins[i][:])
 
-        # set properties for landmarks
+        # set properties for objects
         for i, object in enumerate(world.objects):
             object.color = np.array([0, 0, 1])
-            object.state.p_pos = 0.2 * np.random.randn(world.dim_p) + np.array([0.5, 0.0])
+            object.state.p_pos = 0.2 * np.random.randn(world.dim_p) + np.random.choice([-1, 1]) * np.array([0.5, 0.0])
 
         # set properties for goal
         world.goals[0].state.p_pos = - world.objects[0].state.p_pos

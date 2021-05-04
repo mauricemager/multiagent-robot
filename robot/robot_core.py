@@ -1,4 +1,5 @@
 from multiagent.core import AgentState, Agent, World, Entity
+from multiagent.rendering import make_circle
 import math
 import numpy as np
 
@@ -13,6 +14,7 @@ class RobotState(AgentState):
         # robot is grasping something
         self.grasp = 0.0
 
+
 class Landmark(Entity):
     def __init__(self):
         super().__init__()
@@ -26,6 +28,14 @@ class Landmark(Entity):
         pos = self.state.p_pos
         points = size * np.array([[-2, -1], [0, 2.5], [2, -1]]) + pos
         return points.tolist()
+
+    def create_goal_points2(self, radius=0.075, res=30, filled=True):
+        points = []
+        for i in range(res):
+            ang = 2 * math.pi * i / res
+            points.append((math.cos(ang) * radius, math.sin(ang) * radius))
+        return points + self.state.p_pos
+
 
 class Robot(Agent):
     def __init__(self):
@@ -72,10 +82,10 @@ class Robot(Agent):
         points = np.array(points) + [self.position_end_effector()]
         return points
 
-    def get_joint_pos(self, joint): # returns a numpy array of pos
+    def get_joint_pos(self, joint):  # returns a numpy array of pos
         if joint == 0: return self.state.p_pos
-        angle = self.state.angles.cumsum()[joint-1] # cumsum because of relative angle definition
-        pos = self.get_joint_pos(joint-1) + self.state.lengths[joint-1] * np.array([np.cos(angle), np.sin(angle)])
+        angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
+        pos = self.get_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
         # print(f" joint: {joint} gives pos: {pos}")
         # print(f" angles are: {self.state.angles}")
         return pos
@@ -112,7 +122,7 @@ class Robotworld(World):
         for i, agent in enumerate(self.agents):
             # if i == 0: continue
             self.update_agent_state(agent)
-            for object in self.objects: # TODO: limit to only one grabbing a object
+            for object in self.objects:  # TODO: limit to only one grabbing a object
                 self.update_object_state(agent, object)
 
     def update_agent_state(self, agent):
@@ -120,11 +130,15 @@ class Robotworld(World):
         for i in range(len(agent.state.angles)):  # 2 when agent has 2 joints
             agent.state.angles[i] += agent.action.u[i] * self.step_size
             # make sure state stays within resolution
-            if agent.state.angles[i] > math.pi: agent.state.angles[i] -= 2 * math.pi
-            elif agent.state.angles[i] <= -math.pi: agent.state.angles[i] += 2 * math.pi
+            if agent.state.angles[i] > math.pi:
+                agent.state.angles[i] -= 2 * math.pi
+            elif agent.state.angles[i] <= -math.pi:
+                agent.state.angles[i] += 2 * math.pi
         # activate gripper when last action element == 1.0
-        if agent.action.u[self.num_joints] > 0: agent.state.grasp = 1.0
-        else: agent.state.grasp = 0.0
+        if agent.action.u[self.num_joints] > 0:
+            agent.state.grasp = 1.0
+        else:
+            agent.state.grasp = 0.0
 
     def update_object_state(self, agent, object):
         # adjust the position of the object when manipulated by robot
@@ -134,7 +148,8 @@ class Robotworld(World):
 
     def robot_position(self, n, r=0.5):
         # determine robot's origin position for different configurations
-        if n == 1: return [[0, 0]]
+        if n == 1:
+            return [[0, 0]]
         else:
             phi = 2 * math.pi / n
             position = [[r * math.cos(phi * i + math.pi),

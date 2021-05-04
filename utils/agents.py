@@ -9,7 +9,7 @@ from torch.distributions import Normal
 
 # self.step() changed to sample a action from distribution given by network
 # self.exploration removed OUNoise and introduced self.var line 45
-# added self.variance in self.scale_noise() line 61
+# added self.variance in self.scale2_noise() line 61
 
 class DDPGAgent(object):
     """
