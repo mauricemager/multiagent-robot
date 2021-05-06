@@ -82,10 +82,19 @@ class Robot(Agent):
         points = np.array(points) + [self.position_end_effector()]
         return points
 
+        # TODO: change name to global
     def get_joint_pos(self, joint):  # returns a numpy array of pos
         if joint == 0: return self.state.p_pos
         angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
         pos = self.get_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
+        # print(f" joint: {joint} gives pos: {pos}")
+        # print(f" angles are: {self.state.angles}")
+        return pos
+
+    def local_joint_pos(self, joint):
+        if joint == 0: return np.array([0.0, 0.0])
+        angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
+        pos = self.local_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
         # print(f" joint: {joint} gives pos: {pos}")
         # print(f" angles are: {self.state.angles}")
         return pos
@@ -120,14 +129,15 @@ class Robotworld(World):
 
     def step(self):
         for i, agent in enumerate(self.agents):
-            # if i == 0: continue
+            # if i == 1: continue # only let agent0 do actions
             self.update_agent_state(agent)
-            for object in self.objects:  # TODO: limit to only one grabbing a object
+            for object in self.objects:  # TODO: limit to only one grabbing one object at a time
                 self.update_object_state(agent, object)
 
     def update_agent_state(self, agent):
         # change the agent state as influence of a step
         for i in range(len(agent.state.angles)):  # 2 when agent has 2 joints
+            # if agent.name == "agent 1": continue # limit joint actions to agent 0
             agent.state.angles[i] += agent.action.u[i] * self.step_size
             # make sure state stays within resolution
             if agent.state.angles[i] > math.pi:
@@ -138,7 +148,7 @@ class Robotworld(World):
         if agent.action.u[self.num_joints] > 0:
             agent.state.grasp = 1.0
         else:
-            agent.state.grasp = 0.0
+            agent.state.grasp = 0.0 # maybe this should be -1?
 
     def update_object_state(self, agent, object):
         # adjust the position of the object when manipulated by robot

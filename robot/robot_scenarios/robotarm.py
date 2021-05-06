@@ -64,6 +64,12 @@ class Scenario(BaseScenario):
 
         # world.goals[0].state.p_vel = np.zeros(world.dim_p)
 
+        # custom initial position: fixed state for agent1
+        # world.agents[1].state.angles = np.array([np.pi, 0])
+        # world.agents[1].state.grasp = 1.0
+        # world.objects[0].state.p_pos = np.array([-0.2, 0])
+        # world.goals[0].state.p_pos = np.array([-0.5, 0.3])
+        # world.agents[0].state.angles = np.array([np.pi/2, 0])
 
     def reward(self, agent, world):
         # reward = 0.0 # reward not collective !!
@@ -75,11 +81,18 @@ class Scenario(BaseScenario):
         # reward = object_dist + 1.5 * goal_dist
         # return -reward
 
-        reward = 0.0
-        for agent in world.agents:
-            reward += np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
-        reward += 2 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        return -reward
+
+        # reward for agent's distance and object to goal
+        # reward = 0.0
+        # for agent in world.agents:
+        #     reward += np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
+        # reward += 2 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # return -reward
+
+        reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        if reward <= 0.05: reward /= 3
+        return -reward * 10
+
 
         # reward = 0.0
         #
@@ -94,23 +107,25 @@ class Scenario(BaseScenario):
         state_obs, object_obs, partner_obs, goal_obs = [], [], [], []
         grasp_obs = [agent.state.grasp]
         # update agent state observation
-        for i in range(world.num_joints + 1):
-            state_obs += agent.get_joint_pos(i).tolist()
+        for i in range(1, world.num_joints + 1):
+            # state_obs += agent.get_joint_pos(i).tolist()
+            state_obs += agent.local_joint_pos(i).tolist()
         # update object state observation
         for i in range(len(world.objects)):
-            object_obs += world.objects[i].state.p_pos.tolist()
+            object_obs += np.ndarray.tolist(world.objects[i].state.p_pos - agent.state.p_pos)
         # update partner observation, if any (centralized observation, not relative)
         if len(world.agents) > 1:
             for partner in world.agents:
                 # only for partner agents
                 if agent.name == partner.name: continue
                 # partner state observations
-                for i in range(world.num_joints + 1):
-                    partner_obs += partner.get_joint_pos(i).tolist()
+                partner_obs += np.ndarray.tolist(partner.get_joint_pos(world.num_joints) - agent.state.p_pos)
+                # for i in range(world.num_joints + 1):
+                #     partner_obs += partner.get_joint_pos(i).tolist()
                 # add partner grasp observation
                 partner_obs += [partner.state.grasp]
         # update goal observation
-        goal_obs = world.goals[0].state.p_pos.tolist()
+        goal_obs = np.ndarray.tolist(world.goals[0].state.p_pos - agent.state.p_pos)
 
         return state_obs + grasp_obs + object_obs + partner_obs + goal_obs
 

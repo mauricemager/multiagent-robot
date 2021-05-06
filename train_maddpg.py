@@ -217,15 +217,15 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=20000, type=int)
+    parser.add_argument("--n_episodes", default=100000, type=int)
     parser.add_argument("--episode_length", default=100, type=int)
     parser.add_argument("--steps_per_update", default=100, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=20000, type=int)
-    parser.add_argument("--init_noise_scale", default=0.5, type=float)
-    parser.add_argument("--final_noise_scale", default=0.5, type=float)
+    parser.add_argument("--n_exploration_eps", default=100000, type=int)
+    parser.add_argument("--init_noise_scale", default=1.0, type=float)
+    parser.add_argument("--final_noise_scale", default=1.0, type=float)
     parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
     parser.add_argument("--lr", default=0.01, type=float)
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     parser.add_argument("--save_gifs", default=True,
                         action="store_true",
                         help="Saves gif of each episode into model directory")
-    parser.add_argument("--n_evaluations", default=10, type=int)
+    parser.add_argument("--n_evaluations", default=20, type=int)
     parser.add_argument("--fps", default=30, type=int)
     # parser.add_argument("--eval", default=True, type=bool)
 
