@@ -62,6 +62,11 @@ class RobotEnv(MultiAgentEnv):
         # make sure we used all elements of action
         assert len(action) == 0
 
+    def _get_done(self, agent):
+        if self.done_callback is None:
+            return False
+        return self.done_callback(agent, self.world)
+
     # render environment
     def render(self, mode='human'):
         if mode == 'human':

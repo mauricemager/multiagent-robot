@@ -35,7 +35,7 @@ if __name__ == '__main__':
             act_n.append(policy.action(obs_n[i]))
         # step environment
         obs_n, reward_n, done_n, _ = env.step(act_n)
-        # print(f'observation_n = {obs_n}')
+        print(f'observation_n = {obs_n}')
         # print(f" joint0 pos = {type(world.agents[0].get_joint_pos(0))}"
         #       f" joint1 pos = {world.agents[0].get_joint_pos(1)}"
         #       f" joint2 pos = {world.agents[0].get_joint_pos(2)}")
