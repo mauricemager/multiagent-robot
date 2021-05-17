@@ -3,6 +3,8 @@ import math
 from robot.robot_core import Robot, Robotworld, Landmark
 from multiagent.scenario import BaseScenario
 
+np.random.seed(2)
+
 class Scenario(BaseScenario):
     def make_world(self):
         # define scenario properties
@@ -58,13 +60,13 @@ class Scenario(BaseScenario):
         world.goals[0].color = np.array([1, 0, 0])
 
     def reward(self, agent, world):
-        r_grab = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
-        r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        return -r_grab - 2 * r_goal
+        # r_grab = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
+        # r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # return -r_grab - 2 * r_goal
 
-        # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        # if reward <= 0.05: reward /= 5
-        # return -reward * 10
+        reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        if reward <= 0.05: reward /= 5
+        return -reward
 
         #
         # for agent in world.agents:

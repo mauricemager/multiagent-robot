@@ -91,6 +91,7 @@ class Scenario(BaseScenario):
 
         reward = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
         reward += 3 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        if reward <= 0.10: reward /= 3
         return -reward
 
         # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
