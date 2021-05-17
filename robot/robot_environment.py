@@ -62,10 +62,42 @@ class RobotEnv(MultiAgentEnv):
         # make sure we used all elements of action
         assert len(action) == 0
 
+    def step(self, action_n):
+        obs_n = []
+        reward_n = []
+        done_n = []
+        info_n = {'n': []}
+        self.agents = self.world.policy_agents
+        # set action for each agent
+        for i, agent in enumerate(self.agents):
+            self._set_action(action_n[i], agent, self.action_space[i])
+        # advance world state
+        self.world.step()
+        # record observation for each agent
+
+        self.done_callback = bool(
+            np.linalg.norm(self.world.goals[0].state.p_pos - self.world.objects[0].state.p_pos) < 0.04)
+
+        for agent in self.agents:
+            obs_n.append(self._get_obs(agent))
+            reward_n.append(self._get_reward(agent))
+            done_n.append(self._get_done(agent))
+
+            info_n['n'].append(self._get_info(agent))
+
+        # all agents get total reward in cooperative case
+        reward = np.sum(reward_n)
+        if self.shared_reward:
+            reward_n = [reward] * self.n
+
+        return obs_n, reward_n, done_n, info_n
+
     def _get_done(self, agent):
         if self.done_callback is None:
             return False
-        return self.done_callback(agent, self.world)
+        # elif a
+        return self.done_callback
+
 
     # render environment
     def render(self, mode='human'):
@@ -89,7 +121,7 @@ class RobotEnv(MultiAgentEnv):
                 # import rendering only if we need it (and don't import for headless machines)
                 #from gym.envs.classic_control import rendering
                 from multiagent import rendering
-                self.viewers[i] = rendering.Viewer(700,700)
+                self.viewers[i] = rendering.Viewer(700, 700)
 
         results = []
         for i in range(len(self.viewers)):

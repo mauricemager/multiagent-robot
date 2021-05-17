@@ -62,6 +62,10 @@ class Scenario(BaseScenario):
         r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
         return -r_grab - 2 * r_goal
 
+        # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # if reward <= 0.05: reward /= 5
+        # return -reward * 10
+
         #
         # for agent in world.agents:
         #     reward += np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
@@ -109,39 +113,66 @@ class Scenario(BaseScenario):
 
     def observation(self, agent, world):
         # initialize observation variables
-        # state_observations = (agent.state.angles / math.pi).tolist() + [agent.state.grasp]
-        goal_obs = world.goals[0].state.p_pos.tolist() # cartesian goal obs
-        # goal_obs =
-        object_obs = world.objects[0].state.p_pos.tolist() # cartesian obs
-        object_dist = []
-        partners = []
-        state_obs = []
+        state_obs, object_obs, partner_obs, goal_obs = [], [], [], []
         grasp_obs = [agent.state.grasp]
-        for joint in range(1, world.num_joints + 1): # cartesian observation
-            state_obs += agent.get_joint_pos(joint).tolist()
-
-        # for joint in range(world.num_joints):
-        #     state_obs += [agent.state.angles[joint]]
-
-
-        # fill in object observation for every object in the environment
-        for object in world.objects:
-            # determine relative distance to every object in the environment
-            dist = np.sum(np.square(object.state.p_pos - agent.position_end_effector()))
-            object_dist += [dist]
-        # print(f'object_dist test = {object_dist}')
-        # when partner agents available, obtain their information
+        # update agent state observation
+        for i in range(1, world.num_joints + 1):
+            # state_obs += agent.get_joint_pos(i).tolist()
+            state_obs += agent.local_joint_pos(i).tolist()
+        # update object state observation
+        for i in range(len(world.objects)):
+            object_obs += np.ndarray.tolist(world.objects[i].state.p_pos - agent.state.p_pos)
+        # update partner observation, if any (centralized observation, not relative)
         if len(world.agents) > 1:
             for partner in world.agents:
                 # only for partner agents
-                if agent.name != partner.name:
-                    # determine relative distance to other agent's end effector
-                    diff = partner.position_end_effector() - agent.position_end_effector()
-                    partners += [np.linalg.norm(diff)] + [partner.state.grasp]
-        # combine observations to a single numpy array
-        return state_obs + grasp_obs + object_obs + partners + goal_obs
-        # return state_obs + grasp_obs + object_dist + partners + goal_obs
-        # return state_observations + object_pos + partners + goal_obs
+                if agent.name == partner.name: continue
+                # partner state observations
+                partner_obs += np.ndarray.tolist(partner.get_joint_pos(world.num_joints) - agent.state.p_pos)
+                # for i in range(world.num_joints + 1):
+                #     partner_obs += partner.get_joint_pos(i).tolist()
+                # add partner grasp observation
+                partner_obs += [partner.state.grasp]
+        # update goal observation
+        goal_obs = np.ndarray.tolist(world.goals[0].state.p_pos - agent.state.p_pos)
+
+        return state_obs + grasp_obs + object_obs + partner_obs + goal_obs
+
+        #
+        # # initialize observation variables
+        # # state_observations = (agent.state.angles / math.pi).tolist() + [agent.state.grasp]
+        # goal_obs = world.goals[0].state.p_pos.tolist() # cartesian goal obs
+        # # goal_obs =
+        # object_obs = world.objects[0].state.p_pos.tolist() # cartesian obs
+        # object_dist = []
+        # partners = []
+        # state_obs = []
+        # grasp_obs = [agent.state.grasp]
+        # for joint in range(1, world.num_joints + 1): # cartesian observation
+        #     state_obs += agent.get_joint_pos(joint).tolist()
+        #
+        # # for joint in range(world.num_joints):
+        # #     state_obs += [agent.state.angles[joint]]
+        #
+        #
+        # # fill in object observation for every object in the environment
+        # for object in world.objects:
+        #     # determine relative distance to every object in the environment
+        #     dist = np.sum(np.square(object.state.p_pos - agent.position_end_effector()))
+        #     object_dist += [dist]
+        # # print(f'object_dist test = {object_dist}')
+        # # when partner agents available, obtain their information
+        # if len(world.agents) > 1:
+        #     for partner in world.agents:
+        #         # only for partner agents
+        #         if agent.name != partner.name:
+        #             # determine relative distance to other agent's end effector
+        #             diff = partner.position_end_effector() - agent.position_end_effector()
+        #             partners += [np.linalg.norm(diff)] + [partner.state.grasp]
+        # # combine observations to a single numpy array
+        # return state_obs + grasp_obs + object_obs + partners + goal_obs
+        # # return state_obs + grasp_obs + object_dist + partners + goal_obs
+        # # return state_observations + object_pos + partners + goal_obs
 
 
 
