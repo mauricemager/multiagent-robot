@@ -121,7 +121,7 @@ class Robotworld(World):
         #
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 10
+        self.step_size = math.pi / 5
 
     @property
     def entities(self):
