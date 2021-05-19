@@ -14,7 +14,7 @@ class RobotEnv(MultiAgentEnv):
         # agent.action.u = np.zeros(self.world.dim_p + 1) # ANDERS
         agent.action.u = np.zeros(self.world.dim_p + 1) # ANDERS
         agent.action.c = np.zeros(self.world.dim_c)
-        print(f'action sample = {action}')
+        # print(f'action sample = {action}')
         # process action
         # if isinstance(action_space, MultiDiscrete):
         #     act = []
@@ -34,8 +34,8 @@ class RobotEnv(MultiAgentEnv):
                 # agent.action.u = np.zeros(self.world.dim_p)
                 agent.action.u = np.zeros(6)
                 # process discrete action
-                print(action)
-                print(f' agent.action.u = {agent.action.u}')
+                # print(action)
+                # print(f' agent.action.u = {agent.action.u}')
                 agent.action.u = action
                 #
                 # if action[0][1] == 1: agent.action.u[0] = +1.0
@@ -68,8 +68,8 @@ class RobotEnv(MultiAgentEnv):
         #         agent.action.c = action[0]
         #     action = action[1:]
         # make sure we used all elements of action
-        print(f'action test = {action}')
-        print(f'agent test = {agent.action.u}')
+        # print(f'action test = {action}')
+        # print(f'agent test = {agent.action.u}')
         # assert len(action) == 0
 
     def step(self, action_n):

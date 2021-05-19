@@ -12,7 +12,7 @@ class Scenario(BaseScenario):
         num_objects = 1
         num_joints = 2
         arm_length = 0.35
-        world_res = 100
+        world_res = 16
         # create world
         world = Robotworld()
         world.discrete_world = True
@@ -68,62 +68,23 @@ class Scenario(BaseScenario):
         world.goals[0].color = np.array([1, 0, 0])
 
     def reward(self, agent, world):
+
+
+
+
         r_grab = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
         r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
         return -r_grab - 2 * r_goal
 
-        # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        # if reward <= 0.05: reward /= 5
-        # return -reward
-
-        #
-        # for agent in world.agents:
-        #     reward += np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
-        # reward += 2 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        # return -reward
-        #
-
-        # # reward = 0.0
-        # for object in world.objects: # dit gaat alleen goed voor 1 object anders overwrite hij
-        #     object_dist = np.sum(np.square(agent.state.p_pos - object.state.p_pos)) # check of dit goed gaat
-        #     goal_dist = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos)) # check of dit goed gaat
-        # reward += object_dist + 1.5 * goal_dist
-        # return -reward
-
-        # reward = 0.0
-        # for object in world.objects:
-        #     dist2 = np.sum(np.square(object.state.p_pos - world.goals[0].state.p_pos))
-        #     reward += dist2
-        # return -reward
-
-        # Cartesian reward signal distances
-        # r_grab, r_goal = 0.0, 0.0
-        # for i in range(len(agent.state.p_pos)):
-        #     r_grab += np.square(world.objects[0].state.p_pos[i] - agent.get_joint_pos(world.num_joints)[i])
-        #     # print(f"agent.get_joint_pos(world.num_joints) = {agent.get_joint_pos(world.num_joints)}")
-        #     # print(f"position_end_effector(self) = {agent.position_end_effector()}")
-        #     r_goal += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
-        #     # reward += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
-        # # print(f"sample: np.sqrt(r_grab) = {- np.sqrt(r_grab)}  "
-        # #       f" and np.sqrt(r_goal) = {-np.sqrt(r_goal)}")
-        # # reward = np.sqrt(r_grab) + np.sqrt(r_goal)
-        # return - np.sqrt(r_grab) - 1.5 * np.sqrt(r_goal)
-
-
-
-
-
-
-        # # reward based on cartesian coordinates
-        # reward = 0.0
-        # for i in range(len(agent.state.p_pos)):
-        #     reward += np.square(world.goals[0].state.p_pos[i] - world.objects[0].state.p_pos[i])
-        # return -np.sqrt(reward)
-
 
     def observation(self, agent, world):
-        state_obs = agent.state.angles.tolist()
-        return state_obs
+        state_obs = []
+        for i in range(world.num_joints):
+            # state_obs += agent.get_joint_pos(i).tolist()
+            state_obs += agent.local_joint_pos(i).tolist()
+
+        grasp_obs = [agent.state.grasp]
+        return state_obs + grasp_obs
         # # initialize observation variables
         # state_obs, object_obs, partner_obs, goal_obs = [], [], [], []
         # grasp_obs = [agent.state.grasp]

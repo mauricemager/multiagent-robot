@@ -18,6 +18,8 @@ class RobotState(AgentState):
 class Landmark(Entity):
     def __init__(self):
         super().__init__()
+        self.state.grabbed = False
+        self.state.who_grabbed = None
 
     def create_object_points(self, size=0.025):
         pos = self.state.p_pos
@@ -35,6 +37,9 @@ class Landmark(Entity):
             ang = 2 * math.pi * i / res
             points.append((math.cos(ang) * radius, math.sin(ang) * radius))
         return points + self.state.p_pos
+
+
+
 
 
 class Robot(Agent):
@@ -84,6 +89,7 @@ class Robot(Agent):
 
         # TODO: change name to global
     def get_joint_pos(self, joint):  # returns a numpy array of pos
+        # only works for continuous
         if joint == 0: return self.state.p_pos
         angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
         pos = self.get_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
@@ -103,12 +109,17 @@ class Robot(Agent):
         # give the position of the end effector
         return np.array(self.create_robot_points()[-1])
 
-    def within_reach(self, object, grasp_range=0.1):
-        # test whether and object is within grasping range for a robot
-        end_pos = np.array(self.position_end_effector())
-        obj_pos = np.array(object.state.p_pos)
-        dist = np.linalg.norm(obj_pos - end_pos)
+    # def within_reach(self, object, grasp_range=0.1):
+    #     # test whether and object is within grasping range for a robot
+    #     end_pos = np.array(self.position_end_effector())
+    #     obj_pos = np.array(object.state.p_pos)
+    #     dist = np.linalg.norm(obj_pos - end_pos)
+    #     return dist <= grasp_range
+
+    def within_reach(self, world, object, grasp_range=0.1):
+        dist = np.linalg.norm(world.get_position(self) - object.state.p_pos)
         return dist <= grasp_range
+
 
 
 class Robotworld(World):
@@ -136,7 +147,7 @@ class Robotworld(World):
             # if i == 1: continue # only let agent0 do actions
             self.update_agent_state_discrete(agent)
             for object in self.objects:  # TODO: limit to only one grabbing one object at a time
-                self.update_object_state(agent, object)
+                self.update_object_state_discrete(agent, object)
 
     def update_agent_state(self, agent):
         # change the agent state as influence of a step
@@ -159,17 +170,15 @@ class Robotworld(World):
             # make sure agent.action.u is one-hot vector
             action = np.where(agent.action.u==1)[0][0]
             if action == 0: agent.state.angles[0] += 1
-            if action == 1: agent.state.angles[0] -= 1
-            if action == 2: agent.state.angles[1] += 1
-            if action == 3: agent.state.angles[1] -= 1
-            if action == 4: agent.state.grasp = True
-            if action == 5: agent.state.grasp = False
+            elif action == 1: agent.state.angles[0] -= 1
+            elif action == 2: agent.state.angles[1] += 1
+            elif action == 3: agent.state.angles[1] -= 1
+            # elif action == 4: agent.state.grasp = True
+            # elif action == 5: agent.state.grasp = False
 
             for i in range(len(agent.state.angles)):
                 if agent.state.angles[i] >= self.resolution: agent.state.angles[i] %= self.resolution
                 if agent.state.angles[i] < 0: agent.state.angles[i] += self.resolution
-
-
 
 
     def update_object_state(self, agent, object):
@@ -179,8 +188,33 @@ class Robotworld(World):
             # object.state.angles = agent.state.angles[0] # This works only for the simple_grab scenario
 
     def update_object_state_discrete(self, agent, object):
+        # only works for one agent
+        if sum(agent.action.u) > 0.0:
+            action = np.where(agent.action.u == 1)[0][0]
+            if action == 4: # close gripper
+                if self.object_grabbable(agent, object):
+                    # object.state.p_pos = self.get_position(agent)
+                    object.state.grabbed = True
+                    object.state.who_grabbed = agent.name
+                    # while agent.state.grasp:
+                    #     object.state.p_pos = self.get_position(agent)
+                    print(f'You should now be grabbing!!')
+                agent.state.grasp = True
+            elif action == 5:
+                agent.state.grasp = False
+                object.state.grabbed = False
+                object.state.who_grabbed = None
+        if object.state.grabbed and object.state.who_grabbed == agent.name:
+            object.state.p_pos = self.get_position(agent)
 
+            # and self.object_grabbable(agent, object):
 
+    def object_grabbable(self, agent, object):
+        if agent.state.grasp == False and (not object.state.grabbed) \
+                and agent.within_reach(self, object):
+            return True
+        else:
+            return False
 
     def robot_position(self, n, r=0.5):
         # determine robot's origin position for different configurations
