@@ -21,7 +21,7 @@ if __name__ == '__main__':
     world = scenario.make_world()
     # create multiagent environment
     env = RobotEnv(world, scenario.reset_world, scenario.reward, scenario.observation, info_callback=None,
-                        shared_viewer=True)
+                        shared_viewer=True, discrete_action=world.discrete_world)
     # render call to create viewer window (necessary only for interactive policies)
     env.render()
     # create interactive policies for each agent
@@ -35,8 +35,8 @@ if __name__ == '__main__':
             act_n.append(policy.action(obs_n[i]))
         # step environment
         obs_n, reward_n, done_n, _ = env.step(act_n)
-        print(f'done = {done_n}')
-        # print(f'observation_n = {obs_n}')
+        # print(f'done = {done_n}')
+        print(f'observation_n = {obs_n}')
         # print(f" joint0 pos = {type(world.agents[0].get_joint_pos(0))}"
         #       f" joint1 pos = {world.agents[0].get_joint_pos(1)}"
         #       f" joint2 pos = {world.agents[0].get_joint_pos(2)}")
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         # print(f"goal angles = {world.goals[0].state.angles}"
         #       f" and agent angle = {world.agents[0].state.angles}"
         #       f" reward = {reward_n}")
-        print(f'reward = {reward_n}')
+        # print(f'reward = {reward_n}')
         # print(f'objects pos = {world.objects[0].state.p_pos} '
         #       f'and goals pos = {world.goals[0].state.p_pos} ')
         # print(f"Theta agent = {env.world.agents[0].state.angles}"

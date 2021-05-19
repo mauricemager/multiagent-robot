@@ -43,7 +43,7 @@ class Robot(Agent):
         # robot state
         self.state = RobotState()
 
-    def create_robot_points(self, shorter_end=False):
+    def create_robot_points(self, shorter_end=False, discrete=False):
         # returns a vector of the joint locations of a multiple joint robot arm
         points = [self.state.p_pos]
         lengths = self.state.lengths
@@ -122,6 +122,10 @@ class Robotworld(World):
         self.goals = []
         # step when a full unit of torque is applied
         self.step_size = math.pi / 5
+        #
+        self.discrete_world = False
+        #
+        self.resolution = None
 
     @property
     def entities(self):
@@ -130,7 +134,7 @@ class Robotworld(World):
     def step(self):
         for i, agent in enumerate(self.agents):
             # if i == 1: continue # only let agent0 do actions
-            self.update_agent_state(agent)
+            self.update_agent_state_discrete(agent)
             for object in self.objects:  # TODO: limit to only one grabbing one object at a time
                 self.update_object_state(agent, object)
 
@@ -150,11 +154,33 @@ class Robotworld(World):
         else:
             agent.state.grasp = 0.0 # maybe this should be -1?
 
+    def update_agent_state_discrete(self, agent):
+        if sum(agent.action.u) > 0.0:
+            # make sure agent.action.u is one-hot vector
+            action = np.where(agent.action.u==1)[0][0]
+            if action == 0: agent.state.angles[0] += 1
+            if action == 1: agent.state.angles[0] -= 1
+            if action == 2: agent.state.angles[1] += 1
+            if action == 3: agent.state.angles[1] -= 1
+            if action == 4: agent.state.grasp = True
+            if action == 5: agent.state.grasp = False
+
+            for i in range(len(agent.state.angles)):
+                if agent.state.angles[i] >= self.resolution: agent.state.angles[i] %= self.resolution
+                if agent.state.angles[i] < 0: agent.state.angles[i] += self.resolution
+
+
+
+
     def update_object_state(self, agent, object):
         # adjust the position of the object when manipulated by robot
         if (agent.within_reach(object) == True) and (agent.state.grasp == True):
             object.state.p_pos = agent.position_end_effector()
             # object.state.angles = agent.state.angles[0] # This works only for the simple_grab scenario
+
+    def update_object_state_discrete(self, agent, object):
+
+
 
     def robot_position(self, n, r=0.5):
         # determine robot's origin position for different configurations
@@ -172,3 +198,63 @@ class Robotworld(World):
         angle = np.random.random_sample() * 2 * math.pi
         random_pos = dist * np.array([math.cos(angle), math.sin(angle)])
         return random_pos
+
+    def get_position(self, entity):
+        if not self.discrete_world: # temporary fix for continuous
+            return entity.position_end_effector()
+        pos = np.array([0.0, 0.0]) # only works for one agent
+        angles = entity.state.angles.cumsum()  # cumsum because of relative angle definition
+        step = 2 * np.pi / self.resolution
+        for i in range(self.num_joints):
+            # joint_pos = self.arm_length * np.array([np.cos(angles[i] * step), np.sin(angles[i] * step)])
+            # print(f'{"test"}')
+            # pos += joint_pos
+            pos += self.arm_length * np.array([np.cos(angles[i] * step), np.sin(angles[i] * step)])
+        return pos
+
+    def create_robot_points(self, robot, shorter_end=False, discrete=False):
+        # returns a vector of the joint locations of a multiple joint robot arm
+        points = [robot.state.p_pos]
+        lengths = robot.state.lengths
+        # cumulate state for defining relative joint positions
+        cum_state = robot.state.angles.cumsum()
+        for i in range(len(robot.state.angles)):
+            length = lengths[i]
+            # remove part of last arm for better rendering with gripper
+            if shorter_end and (i == range(len(robot.state.angles))[-1]):
+                length -= 0.045
+            # joint coordinates per segment
+
+            if discrete:
+                step = 2 * np.pi / self.resolution
+                joint_coordinates = [math.cos(cum_state[i] * step) * length,
+                                     math.sin(cum_state[i] * step) * length]
+            else:
+                joint_coordinates = [math.cos(cum_state[i]) * length,
+                                     math.sin(cum_state[i]) * length]
+            # add the joint coordinates to the points vector
+            points.append([sum(x) for x in zip(points[i], joint_coordinates)])
+        return points
+
+    def create_gripper_points(self, robot, radius=0.05, res=30, gripped=False):
+        # return a vector of the gripper points for rendering
+        # angle of gripper clearance
+        phi = math.pi / 3
+        points = list()
+        # orientation of the gripper w.r.t. end effector
+        orientation = sum(robot.state.angles)
+        if self.discrete_world:
+            orientation *= 2 * np.pi / self.resolution
+        # smaller gripper and clearance when gripped
+        if gripped:
+            radius *= 0.8
+            phi /= 3
+        # create the gripper points relative to end effector orientation
+        for i in range(res):
+            ang = 2 * math.pi * i / res
+            if (ang >= 0.5 * phi) and (ang <= 2 * math.pi - 0.5 * phi):
+                points.append([math.cos(ang + orientation) * radius,
+                               math.sin(ang + orientation) * radius])
+        # translate gripped points to end effector location
+        points = np.array(points) + [self.get_position(robot)]
+        return points

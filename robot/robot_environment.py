@@ -7,34 +7,42 @@ import numpy as np
 class RobotEnv(MultiAgentEnv):
     def __init__(self, *args, **kwargs):
         super(RobotEnv, self).__init__(*args, **kwargs)
-        self.discrete_action_space = False
+        self.discrete_action_space = self.world.discrete_world
 
 
     def _set_action(self, action, agent, action_space, time=None):
+        # agent.action.u = np.zeros(self.world.dim_p + 1) # ANDERS
         agent.action.u = np.zeros(self.world.dim_p + 1) # ANDERS
         agent.action.c = np.zeros(self.world.dim_c)
+        print(f'action sample = {action}')
         # process action
-        if isinstance(action_space, MultiDiscrete):
-            act = []
-            size = action_space.high - action_space.low + 1
-            index = 0
-            for s in size:
-                act.append(action[index:(index+s)])
-                index += s
-            action = act
-        else:
-            action = [action]
+        # if isinstance(action_space, MultiDiscrete):
+        #     act = []
+        #     # size = action_space.high - action_space.low + 1
+        #     size = len(action)
+        #     index = 0
+        #     for s in range(len(action)):
+        #         act.append(action[index:(index+s)])
+        #         index += s
+        #     action = act
+        # else:
+        #     action = [action]
 
         if agent.movable:
             # physical action
             if self.discrete_action_input:
-                agent.action.u = np.zeros(self.world.dim_p)
+                # agent.action.u = np.zeros(self.world.dim_p)
+                agent.action.u = np.zeros(6)
                 # process discrete action
-                if action[0][1] == 1: agent.action.u[0] = +1.0
-                if action[0][2] == 1: agent.action.u[0] = -1.0
-                if action[0][3] == 1: agent.action.u[1] = +1.0
-                if action[0][4] == 1: agent.action.u[1] = -1.0
-                agent.state.grasp = action[0][5] == 1.0
+                print(action)
+                print(f' agent.action.u = {agent.action.u}')
+                agent.action.u = action
+                #
+                # if action[0][1] == 1: agent.action.u[0] = +1.0
+                # if action[0][2] == 1: agent.action.u[0] = -1.0
+                # if action[0][3] == 1: agent.action.u[1] = +1.0
+                # if action[0][4] == 1: agent.action.u[1] = -1.0
+                # agent.state.grasp = action[0][5] == 1.0
             else:
                 if self.force_discrete_action:
                     d = np.argmax(action[0])
@@ -50,17 +58,19 @@ class RobotEnv(MultiAgentEnv):
             if agent.accel is not None:
                 sensitivity = agent.accel
             agent.action.u *= sensitivity
-            action = action[1:]
-        if not agent.silent:
-            # communication action
-            if self.discrete_action_input:
-                agent.action.c = np.zeros(self.world.dim_c)
-                agent.action.c[action[0]] = 1.0
-            else:
-                agent.action.c = action[0]
-            action = action[1:]
+            # action = action[1:]
+        # if not agent.silent:
+        #     # communication action
+        #     if self.discrete_action_input:
+        #         agent.action.c = np.zeros(self.world.dim_c)
+        #         agent.action.c[action[0]] = 1.0
+        #     else:
+        #         agent.action.c = action[0]
+        #     action = action[1:]
         # make sure we used all elements of action
-        assert len(action) == 0
+        print(f'action test = {action}')
+        print(f'agent test = {agent.action.u}')
+        # assert len(action) == 0
 
     def step(self, action_n):
         obs_n = []
@@ -101,19 +111,19 @@ class RobotEnv(MultiAgentEnv):
 
     # render environment
     def render(self, mode='human'):
-        if mode == 'human':
-            alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-            message = ''
-            for agent in self.world.agents:
-                comm = []
-                for other in self.world.agents:
-                    if other is agent: continue
-                    if np.all(other.state.c == 0):
-                        word = '_'
-                    else:
-                        word = alphabet[np.argmax(other.state.c)]
-                    message += (other.name + ' to ' + agent.name + ': ' + word + '   ')
-            # print(message)
+        # if mode == 'human':
+        #     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        #     message = ''
+        #     for agent in self.world.agents:
+        #         comm = []
+        #         for other in self.world.agents:
+        #             if other is agent: continue
+        #             if np.all(other.state.c == 0):
+        #                 word = '_'
+        #             else:
+        #                 word = alphabet[np.argmax(other.state.c)]
+        #             message += (other.name + ' to ' + agent.name + ': ' + word + '   ')
+        #     print(message)
 
         for i in range(len(self.viewers)):
             # create viewers (if necessary)
@@ -137,10 +147,13 @@ class RobotEnv(MultiAgentEnv):
             self.render_geoms = []
             for e, entity in enumerate(self.world.entities):
                 if 'agent' in entity.name:
-                    geom = rendering.make_polyline(entity.create_robot_points(shorter_end=True))
+                    # print(f" points test = {self.world.create_robot_points(entity, shorter_end=True)}")
+                    geom = rendering.make_polyline(self.world.create_robot_points(entity, shorter_end=True,
+                                                                                  discrete=self.world.discrete_world))
                     geom.set_color(*entity.color, alpha=0.5)
                     geom.set_linewidth(5)
-                    gripper = rendering.make_polyline(entity.create_gripper_points(gripped=entity.state.grasp))
+                    gripper = rendering.make_polyline(self.world.create_gripper_points(entity,
+                                                                                       gripped=entity.state.grasp))
                     # gripper = rendering.make_polyline(entity.create_gripper_points(gripped=False))
                     gripper.set_color(*entity.color, alpha=0.5)
                     gripper.set_linewidth(5)
