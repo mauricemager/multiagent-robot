@@ -254,6 +254,8 @@ class MADDPG(object):
                 discrete_action = True
                 get_shape = lambda x: x.n
             num_out_pol = get_shape(acsp)
+            print(f" num_out_pol = {num_out_pol}")
+            print(f" get_shap = {get_shape(env.action_space[0])}")
             # num_out_pol = get_shape(acsp) * 2
             if algtype == "MADDPG":
                 num_in_critic = 0

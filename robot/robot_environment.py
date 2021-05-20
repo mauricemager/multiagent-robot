@@ -53,7 +53,8 @@ class RobotEnv(MultiAgentEnv):
                     agent.action.u[1] += action[0][3] - action[0][4]
                     agent.action.u[-1] = action[0][5]
                 else:
-                    agent.action.u = action[0]
+                    # agent.action.u = action[0]
+                    agent.action.u = action
             sensitivity = 1.0
             if agent.accel is not None:
                 sensitivity = agent.accel

@@ -124,7 +124,6 @@ def run(config):
                                   tau=config.tau,
                                   lr=config.lr,
                                   hidden_dim=config.hidden_dim)
-    # print(f"Is the action discrete {maddpg.discrete_action}")
     # initialise a (experience) buffer to store episode outcomes for training and evaluation
     replay_buffer = ReplayBuffer(config.buffer_length, maddpg.nagents,
                                  [obsp.shape[0] for obsp in env.observation_space],
@@ -251,14 +250,14 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=100000, type=int)
+    parser.add_argument("--n_episodes", default=10000, type=int)
     parser.add_argument("--episode_length", default=20, type=int)
     parser.add_argument("--steps_per_update", default=100, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=100000, type=int)
-    parser.add_argument("--init_noise_scale", default=0, type=float)
+    parser.add_argument("--n_exploration_eps", default=10000, type=int)
+    parser.add_argument("--init_noise_scale", default=0.3, type=float)
     parser.add_argument("--final_noise_scale", default=0, type=float)
     parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
@@ -280,5 +279,5 @@ if __name__ == '__main__':
     parser.add_argument("--fps", default=30, type=int)
 
     config = parser.parse_args()
-
+    config.discrete_action = "discrete" in config.env_id  #quick fix
     run(config)

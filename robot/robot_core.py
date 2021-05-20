@@ -48,7 +48,7 @@ class Robot(Agent):
         # robot state
         self.state = RobotState()
 
-    def create_robot_points(self, shorter_end=False, discrete=False):
+    def create_robot_points(self, shorter_end=False):
         # returns a vector of the joint locations of a multiple joint robot arm
         points = [self.state.p_pos]
         lengths = self.state.lengths
@@ -132,7 +132,7 @@ class Robotworld(World):
         #
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 5
+        self.step_size = math.pi / 10
         #
         self.discrete_world = False
         #
@@ -144,66 +144,92 @@ class Robotworld(World):
 
     def step(self):
         for i, agent in enumerate(self.agents):
-            # if i == 1: continue # only let agent0 do actions
-            self.update_agent_state_discrete(agent)
-            for object in self.objects:  # TODO: limit to only one grabbing one object at a time
-                self.update_object_state_discrete(agent, object)
+            self.update_agent_state(agent, discrete=self.discrete_world)
+            for object in self.objects:
+                # if self.discrete_world:
+                #     self.update_object_state_discrete(agent, object)
+                # else:
+                #     self.update_object_state(agent, object)
+                self.update_object_state(agent, object, discrete=self.discrete_world)
 
-    def update_agent_state(self, agent):
-        # change the agent state as influence of a step
-        for i in range(len(agent.state.angles)):  # 2 when agent has 2 joints
-            # if agent.name == "agent 1": continue # limit joint actions to agent 0
-            agent.state.angles[i] += agent.action.u[i] * self.step_size
-            # make sure state stays within resolution
-            if agent.state.angles[i] > math.pi:
-                agent.state.angles[i] -= 2 * math.pi
-            elif agent.state.angles[i] <= -math.pi:
-                agent.state.angles[i] += 2 * math.pi
-        # activate gripper when last action element == 1.0
-        if agent.action.u[self.num_joints] > 0:
-            agent.state.grasp = 1.0
-        else:
-            agent.state.grasp = 0.0 # maybe this should be -1?
-
-    def update_agent_state_discrete(self, agent):
-        if sum(agent.action.u) > 0.0:
+    def update_agent_state(self, agent, discrete=False):
+        if discrete and sum(agent.action.u) > 0.0:
             # make sure agent.action.u is one-hot vector
-            action = np.where(agent.action.u==1)[0][0]
-            if action == 0: agent.state.angles[0] += 1
-            elif action == 1: agent.state.angles[0] -= 1
-            elif action == 2: agent.state.angles[1] += 1
-            elif action == 3: agent.state.angles[1] -= 1
-
+            action = np.where(agent.action.u == 1)[0][0]
+            if action == 0:
+                agent.state.angles[0] += 1
+            elif action == 1:
+                agent.state.angles[0] -= 1
+            elif action == 2:
+                agent.state.angles[1] += 1
+            elif action == 3:
+                agent.state.angles[1] -= 1
             for i in range(len(agent.state.angles)):
                 if agent.state.angles[i] >= self.resolution: agent.state.angles[i] %= self.resolution
                 if agent.state.angles[i] < 0: agent.state.angles[i] += self.resolution
 
+        elif not discrete: # continuous
+            # change the agent state as influence of a step
+            for i in range(len(agent.state.angles)):  # 2 when agent has 2 joints
+                # if agent.name == "agent 1": continue # limit joint actions to agent 0
+                agent.state.angles[i] += agent.action.u[i] * self.step_size
+                # make sure state stays within resolution
+                if agent.state.angles[i] > math.pi:
+                    agent.state.angles[i] -= 2 * math.pi
+                elif agent.state.angles[i] <= -math.pi:
+                    agent.state.angles[i] += 2 * math.pi
+            # activate gripper when last action element == 1.0
+            if agent.action.u[self.num_joints] > 0:
+                agent.state.grasp = 1.0
+            else:
+                agent.state.grasp = 0.0 # maybe this should be -1?
 
-    def update_object_state(self, agent, object):
-        # adjust the position of the object when manipulated by robot
-        if (agent.within_reach(object) == True) and (agent.state.grasp == True):
-            object.state.p_pos = agent.position_end_effector()
-            # object.state.angles = agent.state.angles[0] # This works only for the simple_grab scenario
 
-    def update_object_state_discrete(self, agent, object):
-        # only works for one agent
-        if sum(agent.action.u) > 0.0:
+    def update_object_state(self, agent, object, discrete=False):
+        """"""
+
+        if discrete and sum(agent.action.u) > 0.0: #TODO: only works for one agent
+
             action = np.where(agent.action.u == 1)[0][0]
-            if action == 4: # close gripper
+            if action == 4:  # close gripper
                 if self.object_grabbable(agent, object):
-                    # object.state.p_pos = self.get_position(agent)
                     object.state.grabbed = True
                     object.state.who_grabbed = agent.name
-                    # while agent.state.grasp:
-                    #     object.state.p_pos = self.get_position(agent)
                     print(f'You should now be grabbing!!')
                 agent.state.grasp = True
             elif action == 5:
                 agent.state.grasp = False
                 object.state.grabbed = False
                 object.state.who_grabbed = None
-        if object.state.grabbed and object.state.who_grabbed == agent.name:
-            object.state.p_pos = self.get_position(agent)
+            if object.state.grabbed and object.state.who_grabbed == agent.name:
+                object.state.p_pos = self.get_position(agent)
+
+        # continuous
+        # adjust the position of the object when manipulated by robot
+        elif not discrete:
+            if (agent.within_reach(self, object) == True) and (agent.state.grasp == True):
+                object.state.p_pos = agent.position_end_effector()
+            # object.state.angles = agent.state.angles[0] # This works only for the simple_grab scenario
+
+    # def update_object_state_discrete(self, agent, object):
+    #     # only works for one agent
+    #     if sum(agent.action.u) > 0.0:
+    #         action = np.where(agent.action.u == 1)[0][0]
+    #         if action == 4: # close gripper
+    #             if self.object_grabbable(agent, object):
+    #                 # object.state.p_pos = self.get_position(agent)
+    #                 object.state.grabbed = True
+    #                 object.state.who_grabbed = agent.name
+    #                 # while agent.state.grasp:
+    #                 #     object.state.p_pos = self.get_position(agent)
+    #                 print(f'You should now be grabbing!!')
+    #             agent.state.grasp = True
+    #         elif action == 5:
+    #             agent.state.grasp = False
+    #             object.state.grabbed = False
+    #             object.state.who_grabbed = None
+    #     if object.state.grabbed and object.state.who_grabbed == agent.name:
+    #         object.state.p_pos = self.get_position(agent)
 
     def object_grabbable(self, agent, object):
         if agent.state.grasp == False and (not object.state.grabbed) \

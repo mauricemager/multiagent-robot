@@ -79,9 +79,9 @@ class DDPGAgent(object):
                 action = onehot_from_logits(action)
         else:  # continuous action
             if explore:
-                # action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
-                dist = Normal(action, self.variance)
-                action = dist.sample()
+                action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
+                # dist = Normal(action, self.variance)
+                # action = dist.sample()
             action = action.clamp(-1, 1)
         return action
 
