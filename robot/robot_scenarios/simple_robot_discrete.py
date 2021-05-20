@@ -12,7 +12,7 @@ class Scenario(BaseScenario):
         num_objects = 1
         num_joints = 2
         arm_length = 0.35
-        world_res = 16
+        world_res = 8
         # create world
         world = Robotworld()
         world.discrete_world = True
@@ -68,23 +68,25 @@ class Scenario(BaseScenario):
         world.goals[0].color = np.array([1, 0, 0])
 
     def reward(self, agent, world):
+        reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        return -reward
 
 
-
-
-        r_grab = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
-        r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        return -r_grab - 2 * r_goal
 
 
     def observation(self, agent, world):
-        state_obs = []
-        for i in range(world.num_joints):
+        state_obs, object_obs, goal_obs = [], [], []
+        for i in range(1, world.num_joints + 1):
             # state_obs += agent.get_joint_pos(i).tolist()
-            state_obs += agent.local_joint_pos(i).tolist()
-
+            state_obs += world.get_joint_pos(agent, i).tolist()
         grasp_obs = [agent.state.grasp]
-        return state_obs + grasp_obs
+        for i in range(len(world.objects)):
+            object_obs += np.ndarray.tolist(world.objects[i].state.p_pos - agent.state.p_pos)
+
+        # update goal observation
+        goal_obs = np.ndarray.tolist(world.goals[0].state.p_pos - agent.state.p_pos)
+        return state_obs + grasp_obs + object_obs + goal_obs
+
         # # initialize observation variables
         # state_obs, object_obs, partner_obs, goal_obs = [], [], [], []
         # grasp_obs = [agent.state.grasp]

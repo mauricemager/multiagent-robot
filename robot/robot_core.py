@@ -173,8 +173,6 @@ class Robotworld(World):
             elif action == 1: agent.state.angles[0] -= 1
             elif action == 2: agent.state.angles[1] += 1
             elif action == 3: agent.state.angles[1] -= 1
-            # elif action == 4: agent.state.grasp = True
-            # elif action == 5: agent.state.grasp = False
 
             for i in range(len(agent.state.angles)):
                 if agent.state.angles[i] >= self.resolution: agent.state.angles[i] %= self.resolution
@@ -206,8 +204,6 @@ class Robotworld(World):
                 object.state.who_grabbed = None
         if object.state.grabbed and object.state.who_grabbed == agent.name:
             object.state.p_pos = self.get_position(agent)
-
-            # and self.object_grabbable(agent, object):
 
     def object_grabbable(self, agent, object):
         if agent.state.grasp == False and (not object.state.grabbed) \
@@ -244,6 +240,17 @@ class Robotworld(World):
             # print(f'{"test"}')
             # pos += joint_pos
             pos += self.arm_length * np.array([np.cos(angles[i] * step), np.sin(angles[i] * step)])
+        return pos
+
+
+    def get_joint_pos(self, agent, joint):
+        if joint == 0: return np.array([0.0, 0.0])
+        angle = agent.state.angles.cumsum()[joint - 1]
+        if self.discrete_world:
+            step = 2 * np.pi / self.resolution
+        else: step = 1
+        pos = self.get_joint_pos(agent, joint - 1) + agent.state.lengths[joint - 1] * np.array([np.cos(angle * step),
+                                                                                                np.sin(angle * step)])
         return pos
 
     def create_robot_points(self, robot, shorter_end=False, discrete=False):
