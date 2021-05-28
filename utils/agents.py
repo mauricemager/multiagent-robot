@@ -1,9 +1,12 @@
-from torch import Tensor
+import torch
+from torch import Tensor, tensor
 from torch.autograd import Variable
 from torch.optim import Adam
 from .networks import MLPNetwork
 from .misc import hard_update, gumbel_softmax, onehot_from_logits
 from .noise import OUNoise
+from random import random, randint
+from torch.nn.functional import one_hot
 
 # ------------------ changes made to this file -----------------
 # imports
@@ -74,9 +77,20 @@ class DDPGAgent(object):
         action = self.policy(obs)
         if self.discrete_action:
             if explore:
-                action = gumbel_softmax(action, hard=True)
+                action = onehot_from_logits(action, eps=self.exploration)
             else:
                 action = onehot_from_logits(action)
+
+            # if explore:
+            #     if random() > self.exploration: # do greedy action
+            #         action = onehot_from_logits(action)
+            #     else: # take random action
+            #         action = one_hot(tensor(randint(0, 5)), num_classes=6).unsqueeze(0).type(torch.float64)
+            # # old
+            # if explore:
+            #     action = gumbel_softmax(action, hard=True)
+            # else:
+            #     action = onehot_from_logits(action)
         else:  # continuous action
             if explore:
                 action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old

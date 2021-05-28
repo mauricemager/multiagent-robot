@@ -106,6 +106,7 @@ class Robot(Agent):
         return pos
 
     def position_end_effector(self):
+        # TODO: still used by continuous
         # give the position of the end effector
         return np.array(self.create_robot_points()[-1])
 
@@ -146,16 +147,13 @@ class Robotworld(World):
         for i, agent in enumerate(self.agents):
             self.update_agent_state(agent, discrete=self.discrete_world)
             for object in self.objects:
-                # if self.discrete_world:
-                #     self.update_object_state_discrete(agent, object)
-                # else:
-                #     self.update_object_state(agent, object)
                 self.update_object_state(agent, object, discrete=self.discrete_world)
 
     def update_agent_state(self, agent, discrete=False):
         if discrete and sum(agent.action.u) > 0.0:
             # make sure agent.action.u is one-hot vector
             action = np.where(agent.action.u == 1)[0][0]
+            # print(f"discrete action = {action} sampled from action.u = {agent.action.u}")
             if action == 0:
                 agent.state.angles[0] += 1
             elif action == 1:
@@ -168,10 +166,9 @@ class Robotworld(World):
                 if agent.state.angles[i] >= self.resolution: agent.state.angles[i] %= self.resolution
                 if agent.state.angles[i] < 0: agent.state.angles[i] += self.resolution
 
-        elif not discrete: # continuous
+        elif not discrete: # then continuous action space
             # change the agent state as influence of a step
             for i in range(len(agent.state.angles)):  # 2 when agent has 2 joints
-                # if agent.name == "agent 1": continue # limit joint actions to agent 0
                 agent.state.angles[i] += agent.action.u[i] * self.step_size
                 # make sure state stays within resolution
                 if agent.state.angles[i] > math.pi:
@@ -182,7 +179,7 @@ class Robotworld(World):
             if agent.action.u[self.num_joints] > 0:
                 agent.state.grasp = 1.0
             else:
-                agent.state.grasp = 0.0 # maybe this should be -1?
+                agent.state.grasp = 0.0
 
 
     def update_object_state(self, agent, object, discrete=False):

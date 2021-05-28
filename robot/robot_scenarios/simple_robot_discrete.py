@@ -12,7 +12,8 @@ class Scenario(BaseScenario):
         num_objects = 1
         num_joints = 2
         arm_length = 0.35
-        world_res = 8
+        world_res = 4
+
         # create world
         world = Robotworld()
         world.discrete_world = True
@@ -62,15 +63,16 @@ class Scenario(BaseScenario):
             # print(f" test = {world.get_position(object)}")
 
         # set properties for goal
-        # world.goals[0].state.p_pos = world.random_object_pos()
         world.goals[0].state.angles = np.random.randint(world.resolution, size=world.num_joints)
         world.goals[0].state.p_pos = world.get_position(world.goals[0])
         world.goals[0].color = np.array([1, 0, 0])
 
     def reward(self, agent, world):
+        # print(f"world.goals[0].state.p_pos = {world.goals[0].state.p_pos} and world.objects[0].state.p_pos = {world.objects[0].state.p_pos}")
+        # print(f"world.objects[0].state.p_pos = {world.objects[0].state.p_pos}")
         reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # print(f'reward = {reward}')
         return -reward
-
 
 
 
@@ -86,7 +88,7 @@ class Scenario(BaseScenario):
             object_obs += np.ndarray.tolist(object.state.p_pos - agent.state.p_pos)
             if object.state.grabbed and object.state.who_grabbed == agent.name:
                 picked_obs = [1.0]
-        #
+
         # for i in range(len(world.objects)):
         #     object_obs += np.ndarray.tolist(world.objects[i].state.p_pos - agent.state.p_pos)
 

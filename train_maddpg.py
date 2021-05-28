@@ -159,6 +159,11 @@ def run(config):
         # maddpg.scale_noise(config.init_noise_scale / (ep_i + 1) + config.final_noise_scale)
         maddpg.reset_noise()
 
+        # set epsilon for epsilon greedy
+        # epsilon = config.init_noise_scale - (config.init_noise_scale - config.final_noise_scale) \
+        #           / config.n_exploration_eps * ep_i
+        # print(maddpg.agents[0].exploration)
+
         # simulate one episode over all time steps
         for et_i in range(config.episode_length):
             # rearrange observations to be per agent, and convert to torch Variable
@@ -247,7 +252,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed",
                         default=1, type=int,
                         help="Random seed")
-    parser.add_argument("--n_rollout_threads", default=4, type=int)
+    parser.add_argument("--n_rollout_threads", default=1, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
     parser.add_argument("--n_episodes", default=10000, type=int)
@@ -257,7 +262,7 @@ if __name__ == '__main__':
                         default=1024, type=int,
                         help="Batch size for model training")
     parser.add_argument("--n_exploration_eps", default=10000, type=int)
-    parser.add_argument("--init_noise_scale", default=0.3, type=float)
+    parser.add_argument("--init_noise_scale", default=0.003, type=float)
     parser.add_argument("--final_noise_scale", default=0, type=float)
     parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
@@ -275,7 +280,7 @@ if __name__ == '__main__':
     parser.add_argument("--save_gifs", default=True,
                         action="store_true",
                         help="Saves gif of each episode into model directory")
-    parser.add_argument("--n_evaluations", default=20, type=int)
+    parser.add_argument("--n_evaluations", default=10, type=int)
     parser.add_argument("--fps", default=30, type=int)
 
     config = parser.parse_args()

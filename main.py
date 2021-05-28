@@ -12,7 +12,7 @@ import robot.robot_scenarios as scenarios
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-s', '--scenario', default='simple_robot_discrete .py', help='Path of the scenario Python script.')
+    parser.add_argument('-s', '--scenario', default='simple_robot_discrete.py', help='Path of the scenario Python script.')
     args = parser.parse_args()
 
     # load scenario from script
