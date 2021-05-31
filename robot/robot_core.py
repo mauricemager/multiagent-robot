@@ -133,7 +133,7 @@ class Robotworld(World):
         #
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 10
+        self.step_size = math.pi / 25
         #
         self.discrete_world = False
         #
@@ -148,20 +148,22 @@ class Robotworld(World):
             self.update_agent_state(agent, discrete=self.discrete_world)
             for object in self.objects:
                 self.update_object_state(agent, object, discrete=self.discrete_world)
+            print(f"length of action vector = {len(agent.action.u)}")
 
     def update_agent_state(self, agent, discrete=False):
         if discrete and sum(agent.action.u) > 0.0:
             # make sure agent.action.u is one-hot vector
             action = np.where(agent.action.u == 1)[0][0]
-            # print(f"discrete action = {action} sampled from action.u = {agent.action.u}")
+            # TODO: this code is ugly and only works for 1 or 2 joints per agent
             if action == 0:
                 agent.state.angles[0] += 1
             elif action == 1:
                 agent.state.angles[0] -= 1
-            elif action == 2:
-                agent.state.angles[1] += 1
-            elif action == 3:
-                agent.state.angles[1] -= 1
+            if self.num_joints == 2: # when 2 joints
+                if action == 2:
+                    agent.state.angles[1] += 1
+                elif action == 3:
+                    agent.state.angles[1] -= 1
             for i in range(len(agent.state.angles)):
                 if agent.state.angles[i] >= self.resolution: agent.state.angles[i] %= self.resolution
                 if agent.state.angles[i] < 0: agent.state.angles[i] += self.resolution

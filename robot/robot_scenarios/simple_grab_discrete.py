@@ -1,5 +1,4 @@
 import numpy as np
-import math
 from robot.robot_core import Robot, Robotworld, Landmark
 from multiagent.scenario import BaseScenario
 
@@ -10,9 +9,9 @@ class Scenario(BaseScenario):
         # define scenario properties
         num_agents = 1
         num_objects = 1
-        num_joints = 2
+        num_joints = 1
         arm_length = 0.35
-        world_res = 4
+        world_res = 16
 
         # create world
         world = Robotworld()
