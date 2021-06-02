@@ -2,7 +2,7 @@ import numpy as np
 from robot.robot_core import Robot, Robotworld, Landmark
 from multiagent.scenario import BaseScenario
 
-np.random.seed(2)
+# np.random.seed(2)
 
 class Scenario(BaseScenario):
     def make_world(self):
@@ -69,9 +69,12 @@ class Scenario(BaseScenario):
     def reward(self, agent, world):
         # print(f"world.goals[0].state.p_pos = {world.goals[0].state.p_pos} and world.objects[0].state.p_pos = {world.objects[0].state.p_pos}")
         # print(f"world.objects[0].state.p_pos = {world.objects[0].state.p_pos}")
-        reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        r_object = np.linalg.norm(world.objects[0].state.p_pos - world.get_joint_pos(agent, 1))
         # print(f'reward = {reward}')
-        return -reward
+        # print(f'world.get_joint_pos(agent, 1) ={world.get_joint_pos(agent, 1)}')
+        return -2*r_goal -r_object
 
 
     def observation(self, agent, world):

@@ -55,5 +55,5 @@ if __name__ == '__main__':
         # display rewards
         # for agent in env.world.agents:
            # print(agent.name + " reward: %0.3f" % env._get_reward(agent))
-
+        # print(f"agent end pos = {}")
 

@@ -157,12 +157,7 @@ def run(config):
         explr_pct_remaining = max(0, config.n_exploration_eps - ep_i) / config.n_exploration_eps
         maddpg.scale_noise(config.final_noise_scale + (config.init_noise_scale - config.final_noise_scale) * explr_pct_remaining)
         # maddpg.scale_noise(config.init_noise_scale / (ep_i + 1) + config.final_noise_scale)
-        maddpg.reset_noise()
-
-        # set epsilon for epsilon greedy
-        # epsilon = config.init_noise_scale - (config.init_noise_scale - config.final_noise_scale) \
-        #           / config.n_exploration_eps * ep_i
-        # print(maddpg.agents[0].exploration)
+        # maddpg.reset_noise()
 
         # simulate one episode over all time steps
         for et_i in range(config.episode_length):
@@ -198,6 +193,7 @@ def run(config):
                         # sample random batch from experience replay for training
                         sample = replay_buffer.sample(config.batch_size,
                                                       to_gpu=USE_CUDA)
+                        # print(f"sample = {sample}")
                         # update agent's policy and critic
                         maddpg.update(sample, a_i, logger=logger)
                     # update target networks
@@ -252,18 +248,18 @@ if __name__ == '__main__':
     parser.add_argument("--seed",
                         default=1, type=int,
                         help="Random seed")
-    parser.add_argument("--n_rollout_threads", default=1, type=int)
+    parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
     parser.add_argument("--n_episodes", default=10000, type=int)
-    parser.add_argument("--episode_length", default=20, type=int)
-    parser.add_argument("--steps_per_update", default=100, type=int)
+    parser.add_argument("--episode_length", default=25, type=int)
+    parser.add_argument("--steps_per_update", default=1000, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
     parser.add_argument("--n_exploration_eps", default=10000, type=int)
-    parser.add_argument("--init_noise_scale", default=0.003, type=float)
-    parser.add_argument("--final_noise_scale", default=0, type=float)
+    parser.add_argument("--init_noise_scale", default=1.2, type=float)
+    parser.add_argument("--final_noise_scale", default=0.3, type=float)
     parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
     parser.add_argument("--lr", default=0.01, type=float)

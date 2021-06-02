@@ -8,35 +8,23 @@ class RobotEnv(MultiAgentEnv):
     def __init__(self, *args, **kwargs):
         super(RobotEnv, self).__init__(*args, **kwargs)
         self.discrete_action_space = self.world.discrete_world
+        self.shared_reward = True
 
 
     def _set_action(self, action, agent, action_space, time=None):
         # agent.action.u = np.zeros(self.world.dim_p + 1) # ANDERS
         agent.action.u = np.zeros(self.world.dim_p + 1) # ANDERS
-        agent.action.c = np.zeros(self.world.dim_c)
-        # print(f'action sample = {action}')
-        # process action
-        # if isinstance(action_space, MultiDiscrete):
-        #     act = []
-        #     # size = action_space.high - action_space.low + 1
-        #     size = len(action)
-        #     index = 0
-        #     for s in range(len(action)):
-        #         act.append(action[index:(index+s)])
-        #         index += s
-        #     action = act
-        # else:
-        #     action = [action]
+        # agent.action.c = np.zeros(self.world.dim_c)
 
         if agent.movable:
             # physical action
             if self.discrete_action_input:
                 # agent.action.u = np.zeros(self.world.dim_p)
-                agent.action.u = np.zeros(6)
+                agent.action.u = np.zeros(self.world.num_joints * 2 + 2)
                 # process discrete action
                 # print(action)
-                # print(f' agent.action.u = {agent.action.u}')
                 agent.action.u = action
+                # print(f'agent.action.u = {agent.action.u}')
                 #
                 # if action[0][1] == 1: agent.action.u[0] = +1.0
                 # if action[0][2] == 1: agent.action.u[0] = -1.0
@@ -60,18 +48,7 @@ class RobotEnv(MultiAgentEnv):
                 sensitivity = agent.accel
             agent.action.u *= sensitivity
             # action = action[1:]
-        # if not agent.silent:
-        #     # communication action
-        #     if self.discrete_action_input:
-        #         agent.action.c = np.zeros(self.world.dim_c)
-        #         agent.action.c[action[0]] = 1.0
-        #     else:
-        #         agent.action.c = action[0]
-        #     action = action[1:]
-        # make sure we used all elements of action
-        # print(f'action test = {action}')
-        # print(f'agent test = {agent.action.u}')
-        # assert len(action) == 0
+
 
     def step(self, action_n):
         obs_n = []

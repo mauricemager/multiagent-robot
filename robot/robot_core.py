@@ -98,6 +98,8 @@ class Robot(Agent):
         return pos
 
     def local_joint_pos(self, joint):
+        # only works for continuous
+        # TODO: place to world
         if joint == 0: return np.array([0.0, 0.0])
         angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
         pos = self.local_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
@@ -148,7 +150,7 @@ class Robotworld(World):
             self.update_agent_state(agent, discrete=self.discrete_world)
             for object in self.objects:
                 self.update_object_state(agent, object, discrete=self.discrete_world)
-            print(f"length of action vector = {len(agent.action.u)}")
+            # print(f"length of action vector = {len(agent.action.u)}")
 
     def update_agent_state(self, agent, discrete=False):
         if discrete and sum(agent.action.u) > 0.0:
@@ -190,6 +192,7 @@ class Robotworld(World):
         if discrete and sum(agent.action.u) > 0.0: #TODO: only works for one agent
 
             action = np.where(agent.action.u == 1)[0][0]
+            if self.num_joints == 1: action += 2 # to make scenario compatible with 2 joints
             if action == 4:  # close gripper
                 if self.object_grabbable(agent, object):
                     object.state.grabbed = True

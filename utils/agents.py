@@ -77,6 +77,7 @@ class DDPGAgent(object):
         action = self.policy(obs)
         if self.discrete_action:
             if explore:
+                # print(f"eps value = {self.exploration}")
                 action = onehot_from_logits(action, eps=self.exploration)
             else:
                 action = onehot_from_logits(action)
