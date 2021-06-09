@@ -46,6 +46,7 @@ class MADDPG(object):
         self.trgt_critic_dev = 'cpu'  # device for target critics
         self.niter = 0
 
+
     @property
     def policies(self):
         return [a.policy for a in self.agents]
@@ -76,9 +77,9 @@ class MADDPG(object):
         Outputs:
             actions: List of actions for each agent
         """
-        # print(f" are we exploring ? {explore}")
-        return [a.step(obs, explore=explore) for a, obs in zip(self.agents,
-                                                                 observations)]
+        # print(f"agent step = {[a.step(obs, explore=explore) for a, obs in zip(self.agents, observations)]}")
+        # return [a.step(obs, explore=explore) for a, obs in zip(self.agents, observations)]
+        return [a.get_action(obs, a.exploration.noise(), explore=explore) for a, obs in zip(self.agents, observations)]
 
     def update(self, sample, agent_i, parallel=False, logger=None):
         """

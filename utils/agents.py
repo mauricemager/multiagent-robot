@@ -33,6 +33,10 @@ class DDPGAgent(object):
                                  hidden_dim=hidden_dim,
                                  constrain_out=True,
                                  discrete_action=discrete_action)
+        self.perturbed_policy = MLPNetwork(num_in_pol, num_out_pol,
+                                 hidden_dim=hidden_dim,
+                                 constrain_out=True,
+                                 discrete_action=discrete_action)
         self.critic = MLPNetwork(num_in_critic, 1,
                                  hidden_dim=hidden_dim,
                                  constrain_out=False)
@@ -62,8 +66,16 @@ class DDPGAgent(object):
         if self.discrete_action:
             self.exploration = scale
         else:
-            self.exploration.scale = scale
-            self.variance = scale
+            # self.exploration.scale = scale
+            self.exploration.sigma = scale
+
+    def get_action(self, obs, noise, exploration=False):
+        if exploration:
+            action = self.perturbed_policy(obs)
+            action += noise
+        else:
+            action = self.policy(obs)
+        return action
 
     def step(self, obs, explore=False):
         """
@@ -77,7 +89,6 @@ class DDPGAgent(object):
         action = self.policy(obs)
         if self.discrete_action:
             if explore:
-                # print(f"eps value = {self.exploration}")
                 action = onehot_from_logits(action, eps=self.exploration)
             else:
                 action = onehot_from_logits(action)
@@ -92,9 +103,19 @@ class DDPGAgent(object):
             #     action = gumbel_softmax(action, hard=True)
             # else:
             #     action = onehot_from_logits(action)
+
         else:  # continuous action
             if explore:
-                action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
+
+                # print(f"UO noise scale = {self.exploration.scale}")
+                # print(f"UO noise sigma = {self.exploration.sigma}")
+                # print(f' action = {action}')
+                added_noise = Variable(Tensor(self.exploration.noise()))
+                # print(f"added noise = {added_noise}")
+                # print(f" added noise = {Variable(Tensor(self.exploration.noise()), requires_grad=False)}")
+                # action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
+                action += added_noise
+                # print(f" new action = {action}")
                 # dist = Normal(action, self.variance)
                 # action = dist.sample()
             action = action.clamp(-1, 1)

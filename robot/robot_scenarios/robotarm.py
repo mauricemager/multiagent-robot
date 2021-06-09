@@ -4,6 +4,8 @@ from robot.robot_core import Robot, Robotworld, Landmark
 # from multiagent.core import Landmark
 from multiagent.scenario import BaseScenario
 
+np.random.seed(2)
+
 class Scenario(BaseScenario):
     def make_world(self):
         # define scenario properties
@@ -62,14 +64,11 @@ class Scenario(BaseScenario):
         world.goals[0].state.p_pos = - world.objects[0].state.p_pos
         world.goals[0].color = np.array([1, 0, 0])
 
-        # world.goals[0].state.p_vel = np.zeros(world.dim_p)
-
-        # custom initial position: fixed state for agent1
-        # world.agents[1].state.angles = np.array([np.pi, 0])
-        # world.agents[1].state.grasp = 1.0
-        # world.objects[0].state.p_pos = np.array([-0.2, 0])
-        # world.goals[0].state.p_pos = np.array([-0.5, 0.3])
-        # world.agents[0].state.angles = np.array([np.pi/2, 0])
+        # manual adjustments
+        world.objects[0].state.p_pos = np.array([1.2, 0])
+        world.goals[0].state.p_pos = np.array([-.4, 0])
+        world.agents[1].state.angles = np.array([0.0, 0.0])
+        world.agents[0].state.angles = np.array([0.0, 0.0])
 
     def reward(self, agent, world):
         # reward = 0.0 # reward not collective !!
@@ -91,7 +90,7 @@ class Scenario(BaseScenario):
 
         reward = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
         reward += 3 * np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        if reward <= 0.10: reward /= 3
+        # if reward <= 0.10: reward /= 3
         return -reward
 
         # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
