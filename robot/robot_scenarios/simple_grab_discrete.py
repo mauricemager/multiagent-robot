@@ -11,7 +11,7 @@ class Scenario(BaseScenario):
         num_objects = 1
         num_joints = 1
         arm_length = 0.35
-        world_res = 16
+        world_res = 8
 
         # create world
         world = Robotworld()
@@ -21,8 +21,6 @@ class Scenario(BaseScenario):
         world.agents = [Robot() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.name = 'agent %d' % i
-            # agent.collide = True
-            # agent.silent = True
 
         # add objects
         world.objects = [Landmark() for i in range(num_objects)]
@@ -34,6 +32,7 @@ class Scenario(BaseScenario):
         for i, goal in enumerate(world.goals):
             goal.name = 'goal'
 
+        # add world properties
         world.num_joints = num_joints
         world.arm_length = arm_length
         world.resolution = world_res
@@ -49,33 +48,29 @@ class Scenario(BaseScenario):
             agent.color = np.array([0.25,0.25,0.25])
             agent.state.lengths = world.arm_length * np.ones(world.num_joints)
             agent.state.angles = np.random.randint(world.resolution, size=world.num_joints)
-            # agent.state.angles = np.array([0, 0.5]) * math.pi
             agent.state.p_pos = np.array(origins[i][:])
 
         # set properties for objects
         for i, object in enumerate(world.objects):
             object.color = np.array([0, 0, 1])
-            # object.state.p_pos = world.random_object_pos()
-            # object.state.p_pos = np.array([0.4, 0.4])
             object.state.angles = np.random.randint(world.resolution, size=world.num_joints)
             object.state.p_pos = world.get_position(object)
-            # print(f" test = {world.get_position(object)}")
 
         # set properties for goal
         world.goals[0].state.angles = np.random.randint(world.resolution, size=world.num_joints)
+        # make sure that object and goal are not the same after initialization
+        while world.goals[0].state.angles == world.objects[0].state.angles:
+            world.goals[0].state.angles = np.random.randint(world.resolution, size=world.num_joints)
         world.goals[0].state.p_pos = world.get_position(world.goals[0])
         world.goals[0].color = np.array([1, 0, 0])
 
+
     def reward(self, agent, world):
-        # print(f"world.goals[0].state.p_pos = {world.goals[0].state.p_pos} and world.objects[0].state.p_pos = {world.objects[0].state.p_pos}")
-        # print(f"world.objects[0].state.p_pos = {world.objects[0].state.p_pos}")
-        # reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        # reward based on agent's distance to object and twice the object's distance to goal
         r_goal = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
         r_object = np.linalg.norm(world.objects[0].state.p_pos - world.get_joint_pos(agent, 1))
-        # print(f'reward = {reward}')
-        # print(f'world.get_joint_pos(agent, 1) ={world.get_joint_pos(agent, 1)}')
-        return -2*r_goal -r_object
-
+        if world.objects[0].state.grabbed: r_goal *= 0.5
+        return -2 * r_goal - r_object
 
     def observation(self, agent, world):
         state_obs, object_obs, goal_obs, picked_obs = [], [], [], [-1.0]

@@ -55,6 +55,7 @@ def onehot_from_logits(logits, eps=0.0):
     if eps == 0.0:
         return argmax_acs
     # get random actions in one-hot form
+    # print(f"taking random action with eps = {eps}")
     rand_acs = Variable(torch.eye(logits.shape[1])[[np.random.choice(
         range(logits.shape[1]), size=logits.shape[0])]], requires_grad=False)
     # chooses between best and random actions using epsilon greedy

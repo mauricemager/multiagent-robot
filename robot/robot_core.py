@@ -12,7 +12,7 @@ class RobotState(AgentState):
         # state angles per joint
         self.angles = []
         # robot is grasping something
-        self.grasp = 0.0
+        self.grasp = False
 
 
 class Landmark(Entity):
@@ -103,21 +103,12 @@ class Robot(Agent):
         if joint == 0: return np.array([0.0, 0.0])
         angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
         pos = self.local_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
-        # print(f" joint: {joint} gives pos: {pos}")
-        # print(f" angles are: {self.state.angles}")
         return pos
 
     def position_end_effector(self):
         # TODO: still used by continuous
         # give the position of the end effector
         return np.array(self.create_robot_points()[-1])
-
-    # def within_reach(self, object, grasp_range=0.1):
-    #     # test whether and object is within grasping range for a robot
-    #     end_pos = np.array(self.position_end_effector())
-    #     obj_pos = np.array(object.state.p_pos)
-    #     dist = np.linalg.norm(obj_pos - end_pos)
-    #     return dist <= grasp_range
 
     def within_reach(self, world, object, grasp_range=0.1):
         dist = np.linalg.norm(world.get_position(self) - object.state.p_pos)
@@ -132,13 +123,13 @@ class Robotworld(World):
         self.arm_length = None
         # joint per robot
         self.num_joints = None
-        #
+        # list of all world goals
         self.goals = []
         # step when a full unit of torque is applied
         self.step_size = math.pi / 25
-        #
+        # continuous or discrete world and action space
         self.discrete_world = False
-        #
+        # state resolution for discrete case
         self.resolution = None
 
     @property

@@ -63,8 +63,12 @@ class RobotEnv(MultiAgentEnv):
         self.world.step()
         # record observation for each agent
 
-        self.done_callback = bool(
-            np.linalg.norm(self.world.goals[0].state.p_pos - self.world.objects[0].state.p_pos) < 0.04)
+        # self.done_callback = bool(
+        #     np.linalg.norm(self.world.goals[0].state.p_pos - self.world.objects[0].state.p_pos) == 0.0)
+        #
+        # self.done_callback = bool(np.linalg.norm(self.world.goals[0].state.p_pos -
+        #                                          self.world.objects[0].state.p_pos) == 0.0)
+        #                      and not
 
         for agent in self.agents:
             obs_n.append(self._get_obs(agent))
@@ -78,36 +82,22 @@ class RobotEnv(MultiAgentEnv):
         if self.shared_reward:
             reward_n = [reward] * self.n
 
+        if done_n[0] == True: print(f"!!!!!!!!!!!!!!!!!! Congratulations, Agent completed episode !!!!!!!!!!!!!!!!!!")
+
         return obs_n, reward_n, done_n, info_n
 
     def _get_done(self, agent):
-        if self.done_callback is None:
-            return False
-        # elif a
-        return self.done_callback
+        goal_reached = bool(np.linalg.norm(self.world.goals[0].state.p_pos - self.world.objects[0].state.p_pos) == 0.0)
+        return not agent.state.grasp and goal_reached
 
 
     # render environment
     def render(self, mode='human'):
-        # if mode == 'human':
-        #     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        #     message = ''
-        #     for agent in self.world.agents:
-        #         comm = []
-        #         for other in self.world.agents:
-        #             if other is agent: continue
-        #             if np.all(other.state.c == 0):
-        #                 word = '_'
-        #             else:
-        #                 word = alphabet[np.argmax(other.state.c)]
-        #             message += (other.name + ' to ' + agent.name + ': ' + word + '   ')
-        #     print(message)
 
         for i in range(len(self.viewers)):
             # create viewers (if necessary)
             if self.viewers[i] is None:
                 # import rendering only if we need it (and don't import for headless machines)
-                #from gym.envs.classic_control import rendering
                 from multiagent import rendering
                 self.viewers[i] = rendering.Viewer(700, 700)
 

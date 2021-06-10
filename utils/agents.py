@@ -87,9 +87,12 @@ class DDPGAgent(object):
             action (PyTorch Variable): Actions for this agent
         """
         action = self.policy(obs)
+        print(f"action first = {action}")
         if self.discrete_action:
             if explore:
-                action = onehot_from_logits(action, eps=self.exploration)
+                # action = onehot_from_logits(action, eps=self.exploration) # epsilon greedy exploration
+                action = gumbel_softmax(action, temperature=self.exploration, hard=True) # gumball softmax exploration
+                print(f'action sample = {action}')
             else:
                 action = onehot_from_logits(action)
 
@@ -106,15 +109,7 @@ class DDPGAgent(object):
 
         else:  # continuous action
             if explore:
-
-                # print(f"UO noise scale = {self.exploration.scale}")
-                # print(f"UO noise sigma = {self.exploration.sigma}")
-                # print(f' action = {action}')
-                added_noise = Variable(Tensor(self.exploration.noise()))
-                # print(f"added noise = {added_noise}")
-                # print(f" added noise = {Variable(Tensor(self.exploration.noise()), requires_grad=False)}")
-                # action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
-                action += added_noise
+                action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
                 # print(f" new action = {action}")
                 # dist = Normal(action, self.variance)
                 # action = dist.sample()

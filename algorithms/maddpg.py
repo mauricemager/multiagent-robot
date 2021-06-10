@@ -78,8 +78,8 @@ class MADDPG(object):
             actions: List of actions for each agent
         """
         # print(f"agent step = {[a.step(obs, explore=explore) for a, obs in zip(self.agents, observations)]}")
-        # return [a.step(obs, explore=explore) for a, obs in zip(self.agents, observations)]
-        return [a.get_action(obs, a.exploration.noise(), explore=explore) for a, obs in zip(self.agents, observations)]
+        return [a.step(obs, explore=explore) for a, obs in zip(self.agents, observations)]
+        # return [a.get_action(obs, a.exploration.noise(), explore=explore) for a, obs in zip(self.agents, observations)]
 
     def update(self, sample, agent_i, parallel=False, logger=None):
         """
