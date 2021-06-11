@@ -87,12 +87,12 @@ class DDPGAgent(object):
             action (PyTorch Variable): Actions for this agent
         """
         action = self.policy(obs)
-        print(f"action first = {action}")
+        # print(f"action first = {action}")
         if self.discrete_action:
             if explore:
                 # action = onehot_from_logits(action, eps=self.exploration) # epsilon greedy exploration
                 action = gumbel_softmax(action, temperature=self.exploration, hard=True) # gumball softmax exploration
-                print(f'action sample = {action}')
+                # print(f'action sample = {action}')
             else:
                 action = onehot_from_logits(action)
 

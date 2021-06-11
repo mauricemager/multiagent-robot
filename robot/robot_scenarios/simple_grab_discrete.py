@@ -73,6 +73,11 @@ class Scenario(BaseScenario):
         return -2 * r_goal - r_object
 
     def observation(self, agent, world):
+
+
+
+
+
         state_obs, object_obs, goal_obs, picked_obs = [], [], [], [-1.0]
         for i in range(1, world.num_joints + 1):
             # state_obs += agent.get_joint_pos(i).tolist()

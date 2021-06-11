@@ -24,13 +24,6 @@ class RobotEnv(MultiAgentEnv):
                 # process discrete action
                 # print(action)
                 agent.action.u = action
-                # print(f'agent.action.u = {agent.action.u}')
-                #
-                # if action[0][1] == 1: agent.action.u[0] = +1.0
-                # if action[0][2] == 1: agent.action.u[0] = -1.0
-                # if action[0][3] == 1: agent.action.u[1] = +1.0
-                # if action[0][4] == 1: agent.action.u[1] = -1.0
-                # agent.state.grasp = action[0][5] == 1.0
             else:
                 if self.force_discrete_action:
                     d = np.argmax(action[0])
