@@ -75,7 +75,7 @@ if __name__ == '__main__':
     parser.add_argument("--incremental", default=None, type=int,
                         help="Load incremental policy from given episode " +
                              "rather than final policy")
-    parser.add_argument("--n_episodes", default=5, type=int)
+    parser.add_argument("--n_episodes", default=10, type=int)
     parser.add_argument("--episode_length", default=150, type=int)
     parser.add_argument("--fps", default=30, type=int)
 

@@ -39,8 +39,8 @@ if __name__ == '__main__':
         env.render()
 
         # debugging
-        print(f'done = {done_n}')
-        # print(f'observation_n = {obs_n}')
+        # print(f'done = {done_n}')
+        print(f'observation_n = {obs_n}')
         print(f'reward = {reward_n}')
         # print(f"grasping = {world.agents[0].state.grasp}")
 

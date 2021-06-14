@@ -131,6 +131,8 @@ class Robotworld(World):
         self.discrete_world = False
         # state resolution for discrete case
         self.resolution = None
+        #
+        self.touched = False
 
     @property
     def entities(self):
@@ -141,7 +143,14 @@ class Robotworld(World):
             self.update_agent_state(agent, discrete=self.discrete_world)
             for object in self.objects:
                 self.update_object_state(agent, object, discrete=self.discrete_world)
-            # print(f"length of action vector = {len(agent.action.u)}")
+            self.update_world_state()
+            # print(f' Robots have kissed = {self.touched}')
+
+    def update_world_state(self, threshold=0.10):
+        dist = np.linalg.norm(self.agents[0].position_end_effector() - self.agents[1].position_end_effector())
+        if dist < threshold:
+            # print(f'Robots kiss!')
+            self.touched = True
 
     def update_agent_state(self, agent, discrete=False):
         if discrete and sum(agent.action.u) > 0.0:

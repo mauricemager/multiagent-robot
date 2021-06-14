@@ -33,10 +33,10 @@ class DDPGAgent(object):
                                  hidden_dim=hidden_dim,
                                  constrain_out=True,
                                  discrete_action=discrete_action)
-        self.perturbed_policy = MLPNetwork(num_in_pol, num_out_pol,
-                                 hidden_dim=hidden_dim,
-                                 constrain_out=True,
-                                 discrete_action=discrete_action)
+        # self.perturbed_policy = MLPNetwork(num_in_pol, num_out_pol,
+        #                          hidden_dim=hidden_dim,
+        #                          constrain_out=True,
+        #                          discrete_action=discrete_action)
         self.critic = MLPNetwork(num_in_critic, 1,
                                  hidden_dim=hidden_dim,
                                  constrain_out=False)
@@ -53,7 +53,7 @@ class DDPGAgent(object):
         self.critic_optimizer = Adam(self.critic.parameters(), lr=lr)
         if not discrete_action:
             self.exploration = OUNoise(num_out_pol)
-            self.variance = OUNoise(num_out_pol)
+            # self.variance = 0.1
         else:
             self.exploration = 0.3  # epsilon for eps-greedy
         self.discrete_action = discrete_action
@@ -69,13 +69,13 @@ class DDPGAgent(object):
             # self.exploration.scale = scale
             self.exploration.sigma = scale
 
-    def get_action(self, obs, noise, exploration=False):
-        if exploration:
-            action = self.perturbed_policy(obs)
-            action += noise
-        else:
-            action = self.policy(obs)
-        return action
+    # def get_action(self, obs, noise, exploration=False):
+    #     if exploration:
+    #         action = self.perturbed_policy(obs)
+    #         action += noise
+    #     else:
+    #         action = self.policy(obs)
+    #     return action
 
     def step(self, obs, explore=False):
         """
@@ -109,10 +109,12 @@ class DDPGAgent(object):
 
         else:  # continuous action
             if explore:
-                action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
-                # print(f" new action = {action}")
-                # dist = Normal(action, self.variance)
-                # action = dist.sample()
+                # action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
+                # print(f"action first = {action}")
+                # print(f" variance now = {self.exploration.sigma}")
+                dist = Normal(action, self.exploration.sigma)
+                action = dist.sample()
+                # print(f"action later = {action}")
             action = action.clamp(-1, 1)
         return action
 

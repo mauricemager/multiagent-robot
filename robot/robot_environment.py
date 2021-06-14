@@ -80,8 +80,11 @@ class RobotEnv(MultiAgentEnv):
         return obs_n, reward_n, done_n, info_n
 
     def _get_done(self, agent):
-        goal_reached = bool(np.linalg.norm(self.world.goals[0].state.p_pos - self.world.objects[0].state.p_pos) == 0.0)
-        return not agent.state.grasp and goal_reached
+        return False
+
+        # goal_reached = bool(np.linalg.norm(self.world.goals[0].state.p_pos - self.world.objects[0].state.p_pos) == 0.0)
+        # return not agent.state.grasp and goal_reached
+        #
 
 
     # render environment
