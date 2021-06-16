@@ -12,7 +12,7 @@ class RobotState(AgentState):
         # state angles per joint
         self.angles = []
         # robot is grasping something
-        self.grasp = False
+        self.grasp = 0.0
 
 
 class Landmark(Entity):
@@ -110,7 +110,7 @@ class Robot(Agent):
         # give the position of the end effector
         return np.array(self.create_robot_points()[-1])
 
-    def within_reach(self, world, object, grasp_range=0.1):
+    def within_reach(self, world, object, grasp_range=0.075):
         dist = np.linalg.norm(world.get_position(self) - object.state.p_pos)
         return dist <= grasp_range
 
@@ -143,7 +143,7 @@ class Robotworld(World):
             self.update_agent_state(agent, discrete=self.discrete_world)
             for object in self.objects:
                 self.update_object_state(agent, object, discrete=self.discrete_world)
-            self.update_world_state()
+            # self.update_world_state()
             # print(f' Robots have kissed = {self.touched}')
 
     def update_world_state(self, threshold=0.10):
@@ -249,6 +249,13 @@ class Robotworld(World):
             position = [[r * math.cos(phi * i + math.pi),
                          r * math.sin(phi * i + math.pi)] for i in range(n)]
             return position
+
+    def object_position(self, agent_pos, radius=0.7):
+        """ Sample object position from uniform unit circle centered around agent"""
+        length = np.sqrt(np.random.uniform(0, radius**2))
+        angle = np.pi * np.random.uniform(0, 2)
+        object_pos = length * np.array([np.cos(angle), np.sin(angle)])
+        return object_pos + agent_pos
 
     def random_object_pos(self):
         # sample random object position from uniform distribution

@@ -60,6 +60,7 @@ class Scenario(BaseScenario):
             object.color = np.array([0, 0, 1])
             object.state.p_pos = 0.2 * np.random.randn(world.dim_p) + np.random.choice([-1, 1]) * np.array([0.5, 0.0])
 
+
         # set properties for goal
         world.goals[0].state.p_pos = - world.objects[0].state.p_pos
         world.goals[0].color = np.array([1, 0, 0])
