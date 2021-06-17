@@ -4,7 +4,7 @@ from robot.robot_core import Robot, Robotworld, Landmark
 # from multiagent.core import Landmark
 from multiagent.scenario import BaseScenario
 
-# np.random.seed(2)
+np.random.seed(2)
 
 class Scenario(BaseScenario):
     def make_world(self):
@@ -71,7 +71,9 @@ class Scenario(BaseScenario):
         # world.agents[1].state.angles = np.array([math.pi/2, 0])
 
     def reward(self, agent, world):
-        reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
+        reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos) + 0.5
+
+        # if agent.state.grasp and agent.within_reach(world, world.objects[0]): reward -= 0.5
         return -reward
 
     def observation(self, agent, world):

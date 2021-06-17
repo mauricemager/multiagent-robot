@@ -115,7 +115,11 @@ class DDPGAgent(object):
                 dist = Normal(action, self.exploration.sigma)
                 action = dist.sample()
                 # print(f"action later = {action}")
-            action = action.clamp(-1, 1)
+                action = action.clamp(-1, 1)
+                # print(action[:][:][-1])
+                # action[:, 2] = 1.0
+            # action[:][2] = 1.0
+            # print(f'ation = {action}')
         return action
 
         # # print(f'exploration noise scale = {self.exploration.scale}')

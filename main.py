@@ -12,7 +12,7 @@ import robot.robot_scenarios as scenarios
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-s', '--scenario', default='pick_and_drop.py', help='Path of the scenario Python script.')
+    parser.add_argument('-s', '--scenario', default='drop_off.py', help='Path of the scenario Python script.')
     args = parser.parse_args()
 
     # load scenario from script
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
         # debugging
         # print(f'done = {done_n}')
-        print(f'observation_n = {obs_n}')
+        # print(f'observation_n = {obs_n}')
         print(f'reward = {reward_n}')
         # print(f"grasping = {world.agents[0].state.grasp}")
 

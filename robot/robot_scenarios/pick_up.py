@@ -70,7 +70,8 @@ class Scenario(BaseScenario):
         # world.agents[1].state.angles = np.array([math.pi/2, 0])
 
     def reward(self, agent, world):
-        reward = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
+        reward = np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints)) + 0.5
+        if agent.state.grasp and agent.within_reach(world, world.objects[0]): reward -= 0.5
         return -reward
 
     def observation(self, agent, world):

@@ -126,7 +126,7 @@ class Robotworld(World):
         # list of all world goals
         self.goals = []
         # step when a full unit of torque is applied
-        self.step_size = math.pi / 25
+        self.step_size = math.pi / 50
         # continuous or discrete world and action space
         self.discrete_world = False
         # state resolution for discrete case
