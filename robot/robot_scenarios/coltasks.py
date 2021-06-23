@@ -4,12 +4,12 @@ from robot.robot_core import Robot, Robotworld, Landmark
 # from multiagent.core import Landmark
 from multiagent.scenario import BaseScenario
 
-np.random.seed(2)
+# np.random.seed(2)
 
 class Scenario(BaseScenario):
     def make_world(self):
         # define scenario properties
-        num_agents = 1
+        num_agents = 2
         num_objects = 1
         num_goals = 1
         num_joints = 2
@@ -55,16 +55,17 @@ class Scenario(BaseScenario):
             agent.state.angles = (2 * np.random.rand(world.num_joints) - 1) * math.pi
             # agent.state.angles = (np.array([0.0,0.5])) * math.pi
             agent.state.p_pos = np.array(origins[i][:])
-            agent.state.grasp = True
 
         # set properties for objects
         for i, object in enumerate(world.objects):
             object.color = np.array([0, 0, 1])
-            object.state.p_pos = world.agents[0].position_end_effector()
+            object.state.p_pos = world.object_position(world.agents[1].state.p_pos, radius=2*world.arm_length)
+
 
         # set goal properties
-        world.goals[0].state.p_pos = world.object_position(world.agents[0].state.p_pos)
+        world.goals[0].state.p_pos = np.array([-1.0, 0.0])
         world.goals[0].color = np.array([1, 0, 0])
+        # world.touched = False
 
         # manual adjustments
         # world.agents[0].state.angles = np.array([0, 0])
@@ -72,11 +73,8 @@ class Scenario(BaseScenario):
 
     def reward(self, agent, world):
         reward = np.linalg.norm(world.goals[0].state.p_pos - world.objects[0].state.p_pos)
-        # r_grab =  np.linalg.norm(world.objects[0].state.p_pos - agent.get_joint_pos(world.num_joints))
-        if agent.state.grasp and agent.within_reach(world, world.objects[0]):
-            return -reward
-        else:
-            return -reward - 1.0
+        return -reward
+
 
     def observation(self, agent, world):
         # initialize observation variables

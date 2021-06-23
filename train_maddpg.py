@@ -82,7 +82,7 @@ def run_evaluation(config, ep_i, gif_path, ifi, maddpg):
 
 def run(config):
     """Run a training instance parameterized by the config file."""
-
+    baseline_reward = np.zeros(1)
     # create model directory based on the trained scenario
     model_dir = Path('./models') / config.env_id / config.model_name
     if not model_dir.exists():
@@ -201,12 +201,18 @@ def run(config):
                 maddpg.prep_rollouts(device='cpu')
 
             # log initialized reward as baseline when no learning is apparent
-            # if et_i == 0: logger.add_scalars('agent0/rewards/',
-            #                                 {'random_agent_reward': rewards.mean()}, ep_i)
+            # if ep_i + et_i == 0:
+            #     baseline_reward = rewards[0].mean()
             if et_i == 0:
+                baseline_reward = np.append(baseline_reward, rewards[0].mean())
+                # baseline_reward += rewards[0].mean() / (ep_i+1)
                 for a_i in range(maddpg.nagents):
                     logger.add_scalars('agent%i/rewards/' % a_i,
-                                      {'random_agent_reward': rewards.mean()}, ep_i)
+                                      {'baseline_reward': baseline_reward.mean()}, ep_i)
+        # if ep_i < 1000:
+        #     baseline_reward = np.append(baseline_reward, replay_buffer.get_average_rewards(
+        #         config.episode_length * config.n_rollout_threads))
+
 
         # log average episode reward for this episode per agent
         ep_rews = replay_buffer.get_average_rewards(
@@ -251,15 +257,15 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=2, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=20000, type=int)
-    parser.add_argument("--episode_length", default=50, type=int)
+    parser.add_argument("--n_episodes", default=30000, type=int)
+    parser.add_argument("--episode_length", default=25, type=int)
     parser.add_argument("--steps_per_update", default=1000, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=20000, type=int)
-    parser.add_argument("--init_noise_scale", default=0.5, type=float)
-    parser.add_argument("--final_noise_scale", default=0.3, type=float)
+    parser.add_argument("--n_exploration_eps", default=30000, type=int)
+    parser.add_argument("--init_noise_scale", default=1.0, type=float)
+    parser.add_argument("--final_noise_scale", default=0.4, type=float)
     parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
     parser.add_argument("--lr", default=0.01, type=float) # increasing learning rate makes training slower, but increases training performance slightly

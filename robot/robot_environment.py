@@ -75,7 +75,7 @@ class RobotEnv(MultiAgentEnv):
         if self.shared_reward:
             reward_n = [reward] * self.n
 
-        if done_n[0] == True: print(f"!!!!!!!!!!!!!!!!!! Congratulations, Agent completed episode !!!!!!!!!!!!!!!!!!")
+        # if done_n[0] == True: print(f"!!!!!!!!!!!!!!!!!! Congratulations, Agent completed episode !!!!!!!!!!!!!!!!!!")
 
         return obs_n, reward_n, done_n, info_n
 
