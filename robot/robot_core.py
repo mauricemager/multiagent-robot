@@ -205,7 +205,7 @@ class Robotworld(World):
                 object.state.who_grabbed = None
             if object.state.grabbed and object.state.who_grabbed == agent.name:
                 object.state.p_pos = self.get_position(agent)
-            if np.linalg.norm(object.state.p_pos - self.goals[0].state.p_pos) < 0.05:
+            if np.linalg.norm(object.state.p_pos - self.goals[0].state.p_pos) < 0.03:
                 object.state.who_grabbed = self.goals[0].name
 
         # continuous

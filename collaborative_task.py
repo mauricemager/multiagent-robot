@@ -8,22 +8,20 @@ from torch.autograd import Variable
 
 
 def run(config):
-    # task1 = 'models/task1/june23/run1/model.pt'
-    # task2 = 'models/task2/june23/run18/model.pt'
-    # task3 = 'models/task3/june23/run3/model.pt'
-    # task4 = 'models/task4/june23/run1/model.pt'
+    task1 = 'models/task1/june23/run1/model.pt'
+    task2 = 'models/task2/june23/run18/model.pt'
+    task3 = 'models/task3/june23/run3/model.pt'
+    task4 = 'models/task4/june24/run1/model.pt'
 
-    task1 = 'trained_models/task1/model.pt'
-    task2 = 'trained_models/task2/model.pt'
-    task3 = 'trained_models/task3/model.pt'
-    task4 = 'trained_models/task4/model.pt'
+    # task1 = 'trained_models/task1/model.pt'
+    # task2 = 'trained_models/task2/model.pt'
+    # task3 = 'trained_models/task3/model.pt'
+    # task4 = 'trained_models/task4/model.pt'
 
     task_paths = [task1, task2, task3, task4]
 
     model_path = (Path('./models') / config.env_id / config.model_name) / 'model.pt'
     policies = [MADDPG.init_from_save(path) for path in task_paths]
-
-
 
     if config.save_gifs:
         gif_path = model_path.parent / 'gifs'
@@ -83,7 +81,7 @@ def choose_task(obs):
     # object distance to agent base in local perspective
     obj_base_agent0 = np.linalg.norm(obj0[0:2])
 
-    if obj_base_agent0 <= 0.5 or obj_grip_agent0 <= 0.2 :# and obj_grip_agent0 <= 0.2:
+    if obj_base_agent0 <= 0.5 or obj_grip_agent0 <= 0.2 :
         if agent0_picked:
             print(f"Do task 4: left agent brings object to goal")
             return 4
