@@ -132,7 +132,7 @@ class Robotworld(World):
         # state resolution for discrete case
         self.resolution = None
         #
-        self.touched = False
+        # self.touched = False
 
     @property
     def entities(self):
@@ -144,7 +144,6 @@ class Robotworld(World):
             for object in self.objects:
                 self.update_object_state(agent, object, discrete=self.discrete_world)
             # self.update_world_state()
-            # print(f' Robots have kissed = {self.touched}')
 
     def update_world_state(self, threshold=0.10):
         dist = np.linalg.norm(self.agents[0].position_end_effector() - self.agents[1].position_end_effector())

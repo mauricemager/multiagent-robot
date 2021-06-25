@@ -3,7 +3,6 @@ from multiagent.environment import MultiAgentEnv
 import numpy as np
 
 # environment for all agents in the multiagent world
-# currently code assumes that no agents will be created/destroyed at runtime!
 class RobotEnv(MultiAgentEnv):
     def __init__(self, *args, **kwargs):
         super(RobotEnv, self).__init__(*args, **kwargs)
@@ -20,24 +19,24 @@ class RobotEnv(MultiAgentEnv):
             # physical action
             if self.discrete_action_input:
                 # agent.action.u = np.zeros(self.world.dim_p)
-                agent.action.u = np.zeros(self.world.num_joints * 2 + 2)
+                agent.action.u = np.zeros(self.world.num_joints * 2 + 2) #TODO "wat is dit" -Tessa >>>>?
                 # process discrete action
                 # print(action)
                 agent.action.u = action
             else:
-                if self.force_discrete_action:
+                if self.force_discrete_action: # niet nodig
                     d = np.argmax(action[0])
                     action[0][:] = 0.0
                     action[0][d] = 1.0
-                if self.discrete_action_space:
+                if self.discrete_action_space: # eigenlijk ook niet nodig
                     agent.action.u[0] += action[0][1] - action[0][2]
                     agent.action.u[1] += action[0][3] - action[0][4]
                     agent.action.u[-1] = action[0][5]
-                else:
+                else: # alleen dit nodig voor continue
                     # agent.action.u = action[0]
                     agent.action.u = action
             sensitivity = 1.0
-            if agent.accel is not None:
+            if agent.accel is not None: # volgensmij ook niet nodig
                 sensitivity = agent.accel
             agent.action.u *= sensitivity
             # action = action[1:]
@@ -74,8 +73,6 @@ class RobotEnv(MultiAgentEnv):
         reward = np.sum(reward_n)
         if self.shared_reward:
             reward_n = [reward] * self.n
-
-        # if done_n[0] == True: print(f"!!!!!!!!!!!!!!!!!! Congratulations, Agent completed episode !!!!!!!!!!!!!!!!!!")
 
         return obs_n, reward_n, done_n, info_n
 
