@@ -5,14 +5,13 @@
 
 import argparse
 from robot.robot_policy import RobotPolicy
-from robot.robot_environment import RobotEnv
-# import multiagent.scenarios as scenarios
+from robot.robot_environment import HierEnv
 import robot.robot_scenarios as scenarios
 
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-s', '--scenario', default='collaborative_task1.py', help='Path of the scenario Python script.')
+    parser.add_argument('-s', '--scenario', default='hierarchical_collaboration.py', help='Path of the scenario Python script.')
     args = parser.parse_args()
 
     # load scenario from script
@@ -20,8 +19,8 @@ if __name__ == '__main__':
     # create world
     world = scenario.make_world()
     # create multiagent environment
-    env = RobotEnv(world, scenario.reset_world, scenario.reward, scenario.observation, info_callback=None,
-                        shared_viewer=True, discrete_action=world.discrete_world)
+    env = HierEnv(world, scenario.reset_world, scenario.reward, scenario.observation, info_callback=None,
+                        shared_viewer=True, discrete_action=True)
     # render call to create viewer window (necessary only for interactive policies)
     env.render()
     # create interactive policies for each agent

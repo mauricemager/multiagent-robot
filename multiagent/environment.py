@@ -42,7 +42,8 @@ class MultiAgentEnv(gym.Env):
             total_action_space = []
             # physical action space
             if self.discrete_action_space:
-                u_action_space = spaces.Discrete(world.num_joints * 2 + 2)
+                u_action_space = spaces.Discrete(4)
+                # u_action_space = spaces.Discrete(world.num_joints * 2 + 2)
             else:
                 u_action_space = spaces.Box(low=-agent.u_range, high=+agent.u_range, shape=(world.dim_p + 1,), dtype=np.float32)
             if agent.movable:

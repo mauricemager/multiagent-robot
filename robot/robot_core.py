@@ -39,7 +39,11 @@ class Landmark(Entity):
         return points + self.state.p_pos
 
 
-
+class Hieragent(Agent):
+    def __init__(self):
+        super().__init__()
+        # state of sub policy
+        self.sub_pol = None
 
 
 class Robot(Agent):
@@ -115,6 +119,12 @@ class Robot(Agent):
         return dist <= grasp_range
 
 
+class Hierworld(World):
+    def __init__(self):
+        super(Hierworld, self).__init__()
+        self.roboworld = Robotworld()
+
+    # def step(self):
 
 class Robotworld(World):
     def __init__(self):
