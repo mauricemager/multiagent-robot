@@ -4,7 +4,7 @@
 # line 14 in multiagent.rendering.py: # from gym.utils import reraise
 
 import argparse
-from robot.robot_policy import RobotPolicy
+from robot.robot_policy import HierPolicy
 from robot.robot_environment import HierEnv
 import robot.robot_scenarios as scenarios
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # render call to create viewer window (necessary only for interactive policies)
     env.render()
     # create interactive policies for each agent
-    policies = [RobotPolicy(env, i) for i in range(env.n)]
+    policies = [HierPolicy(env)]
     # execution loop
     obs_n = env.reset()
     while True:

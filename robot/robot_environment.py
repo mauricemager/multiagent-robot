@@ -1,6 +1,7 @@
 from multiagent.multi_discrete import MultiDiscrete
 from multiagent.environment import MultiAgentEnv
 import numpy as np
+from robot.robot_core import Hieragent
 
 # environment for all agents in the multiagent world
 class RobotEnv(MultiAgentEnv):
@@ -161,28 +162,32 @@ class HierEnv(MultiAgentEnv):
     def __init__(self, *args, **kwargs):
         super(HierEnv, self).__init__(*args, **kwargs)
 
-    def _set_action(self, action, agent, action_space, time=None):
+    def _set_action(self, action, agent, **kwargs):
         # assuming action = np.array([0,0,1,0])
         task = action.argmax() + 1
         agent.action.u = task
 
-    def step(self, action_n):
+    def step(self, master_action):
         obs_n = []
         reward_n = []
         done_n = []
         info_n = {'n': []}
-        self.agents = self.world.policy_agents
-        # set action for each agent
-        for i, agent in enumerate(self.agents):
-            self._set_action(action_n[i], agent, self.action_space[i])
-        # advance world state
+
+        self.agent = Hieragent()
+        self._set_action(master_action, self.agent)
         self.world.step()
+
+        # self.agents = self.world.policy_agents
+        # # set action for each agent
+        # for i, agent in enumerate(self.agents):
+        #     self._set_action(action_n[i], agent, self.action_space[i])
+        # # advance world state
+        # self.world.step()
 
         for agent in self.agents:
             obs_n.append(self._get_obs(agent))
             reward_n.append(self._get_reward(agent))
             done_n.append(self._get_done(agent))
-
             info_n['n'].append(self._get_info(agent))
 
         # all agents get total reward in cooperative case

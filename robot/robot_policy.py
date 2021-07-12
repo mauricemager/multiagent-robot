@@ -10,6 +10,33 @@ class Policy(object):
     def action(self, obs):
         raise NotImplementedError()
 
+class HierPolicy(Policy):
+    def __init__(self, env):
+        self.num_subtasks = 4
+        self.env = env
+        self.task = [False for i in range(self.num_subtasks)]
+        env.viewers[0].window.on_key_press = self.key_press
+        env.viewers[0].window.on_key_release = self.key_release
+
+    def action(self, obs):
+        u = np.zeros(self.num_subtasks)
+        if self.task[0]: u[0] = 1
+        if self.task[1]: u[1] = 1
+        if self.task[2]: u[2] = 1
+        if self.task[3]: u[3] = 1
+        return u
+
+    def key_press(self, k):
+        if   k == key.NUM_1: self.task[0] = True
+        elif k == key.NUM_2: self.task[1] = True
+        elif k == key.NUM_3: self.task[2] = True
+        elif k == key.NUM_4: self.task[3] = True
+
+    def key_release(self, k):
+        if   k == key.NUM_1: self.task[0] = False
+        elif k == key.NUM_2: self.task[1] = False
+        elif k == key.NUM_3: self.task[2] = False
+        elif k == key.NUM_4: self.task[3] = False
 
 # interactive policy based on keyboard input
 # hard-coded to deal only with movement, not communication
@@ -24,8 +51,6 @@ class RobotPolicy(Policy):
         # register keyboard events with this environment's window
         env.viewers[0].window.on_key_press = self.key_press
         env.viewers[0].window.on_key_release = self.key_release
-
-        print(f"test move = {self.move}")
 
     def action(self, obs):
         # ignore observation and just act based on keyboard events
@@ -64,3 +89,4 @@ class RobotPolicy(Policy):
         if k == key.DOWN:  self.move[3] = False
         if k == key.SPACE: self.move[4] = False
         if k == key.LALT:  self.move[5] = False
+

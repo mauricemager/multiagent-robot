@@ -124,7 +124,9 @@ class Hierworld(World):
         super(Hierworld, self).__init__()
         self.roboworld = Robotworld()
 
-    # def step(self):
+    def step(self): # do a step in roboworld while following masterpolicy
+        return None
+
 
 class Robotworld(World):
     def __init__(self):
