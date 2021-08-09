@@ -65,6 +65,9 @@ class CollScenario(BaseScenario):
             goal.state.p_pos = np.array([-1.0, 0.0])
             goal.color = np.array([1, 0, 0])
 
+        # manual adjustments
+        # world.agents[0].state.angles = np.array([np.pi/4, np.pi/4])
+        # world.agents[1].state.angles = np.array([np.pi/2, -np.pi/8])
 
     def reward(self, agent, world):
         """Reward function for total collaborative robotics task."""
@@ -102,6 +105,7 @@ class CollScenario(BaseScenario):
         # update goal observation
         if len(world.goals) > 0:
             goal_obs = np.ndarray.tolist(world.goals[0].state.p_pos - agent.state.p_pos)
+
 
         return state_obs + grasp_obs + object_obs + partner_obs + goal_obs
 

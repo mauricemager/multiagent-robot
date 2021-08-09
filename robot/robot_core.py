@@ -197,6 +197,7 @@ class Robotworld(World):
                 agent.state.grasp = 0.0
 
 
+
     def update_object_state(self, agent, object, discrete=False):
         """"""
 
@@ -349,3 +350,16 @@ class Robotworld(World):
         # translate gripped points to end effector location
         points = np.array(points) + [self.get_position(robot)]
         return points
+
+    def invert_x(self):
+        for agent in self.agents:
+            agent.state.angles *= -1
+
+    def invert_y(self):
+        for agent in self.agents:
+            agent.state.angles[0] = np.pi - agent.state.angles[0]
+            agent.state.angles[1] *= -1
+
+
+
+            # agent.state.angles = np.pi - agent.state.angles

@@ -33,10 +33,6 @@ class DDPGAgent(object):
                                  hidden_dim=hidden_dim,
                                  constrain_out=True,
                                  discrete_action=discrete_action)
-        # self.perturbed_policy = MLPNetwork(num_in_pol, num_out_pol,
-        #                          hidden_dim=hidden_dim,
-        #                          constrain_out=True,
-        #                          discrete_action=discrete_action)
         self.critic = MLPNetwork(num_in_critic, 1,
                                  hidden_dim=hidden_dim,
                                  constrain_out=False)

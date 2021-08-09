@@ -12,7 +12,7 @@ import robot.robot_scenarios as scenarios
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-s', '--scenario', default='collaborative_task1.py', help='Path of the scenario Python script.')
+    parser.add_argument('-s', '--scenario', default='coltasks.py', help='Path of the scenario Python script.')
     args = parser.parse_args()
 
     # load scenario from script
@@ -28,6 +28,8 @@ if __name__ == '__main__':
     policies = [RobotPolicy(env, i) for i in range(env.n)]
     # execution loop
     obs_n = env.reset()
+    # permutate states
+    env.permutate(num=0)
     while True:
         # query for action from each agent's policy
         act_n = []
@@ -42,7 +44,7 @@ if __name__ == '__main__':
         # print(f'done = {done_n}')
         # print(f'observation_n = {obs_n}')
         # print(f" who is grabbing: {world.objects[0].state.who_grabbed}")
-        print(f'reward = {reward_n}')
+        # print(f'reward = {reward_n}')
         # print(f"grasping = {world.agents[0].state.grasp}")
 
         if done_n[0]: break

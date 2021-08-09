@@ -1,9 +1,7 @@
-import math
-import numpy as np
-from multiagent.scenario import BaseScenario
-from robot.robot_core import Robot, Robotworld, Landmark
-
 from robot.robot_scenarios.collaborative_tasks import CollScenario
+
+class Scenario(CollScenario):
+    pass
 
 
 

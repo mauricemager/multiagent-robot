@@ -36,10 +36,10 @@ class RobotEnv(MultiAgentEnv):
                 else: # alleen dit nodig voor continue
                     # agent.action.u = action[0]
                     agent.action.u = action
-            sensitivity = 1.0
-            if agent.accel is not None: # volgensmij ook niet nodig
-                sensitivity = agent.accel
-            agent.action.u *= sensitivity
+            # sensitivity = 1.0
+            # if agent.accel is not None: # volgensmij ook niet nodig
+            #     sensitivity = agent.accel
+            # agent.action.u *= sensitivity
             # action = action[1:]
 
 
@@ -157,6 +157,20 @@ class RobotEnv(MultiAgentEnv):
             results.append(self.viewers[i].render(return_rgb_array = mode=='rgb_array'))
 
         return results
+
+    def permutate(self, num):
+        if num == 0:
+            print(f' Not inverted, state is equal to originial state')
+        elif num == 1:
+            self.world.invert_x()
+            print(f'Inverted state over X-axis')
+        elif num == 2:
+            self.world.invert_y()
+            print(f'Inverted over y-axis')
+        elif num == 3:
+            self.world.invert_x()
+            self.world.invert_y()
+
 
 class HierEnv(MultiAgentEnv):
     def __init__(self, *args, **kwargs):
