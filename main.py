@@ -29,7 +29,7 @@ if __name__ == '__main__':
     # execution loop
     obs_n = env.reset()
     # permutate states
-    env.permutate(num=0)
+    env.permutate(num=3)
     while True:
         # query for action from each agent's policy
         act_n = []

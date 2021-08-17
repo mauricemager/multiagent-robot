@@ -153,6 +153,7 @@ def run(config):
                                         config.n_episodes))
         # initialize environment and set policy device
         obs = env.reset()
+        # env.permutate(num=np.random.randint(4))
         maddpg.prep_rollouts(device='cpu')
         # set maddpg noise scale depending on amount of exploration episodes defined by config
         explr_pct_remaining = max(0, config.n_exploration_eps - ep_i) / config.n_exploration_eps
@@ -259,13 +260,13 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=100000, type=int)
+    parser.add_argument("--n_episodes", default=20000, type=int)
     parser.add_argument("--episode_length", default=40, type=int)
     parser.add_argument("--steps_per_update", default=1000, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=90000, type=int)
+    parser.add_argument("--n_exploration_eps", default=15000, type=int)
     parser.add_argument("--init_noise_scale", default=1.0, type=float)
     parser.add_argument("--final_noise_scale", default=0.4, type=float)
     parser.add_argument("--save_interval", default=100, type=int)

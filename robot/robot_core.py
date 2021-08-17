@@ -13,6 +13,8 @@ class RobotState(AgentState):
         self.angles = []
         # robot is grasping something
         self.grasp = 0.0
+        # torque direction
+        self.torq_dir = 1.0
 
 
 class Landmark(Entity):
@@ -97,8 +99,6 @@ class Robot(Agent):
         if joint == 0: return self.state.p_pos
         angle = self.state.angles.cumsum()[joint - 1]  # cumsum because of relative angle definition
         pos = self.get_joint_pos(joint - 1) + self.state.lengths[joint - 1] * np.array([np.cos(angle), np.sin(angle)])
-        # print(f" joint: {joint} gives pos: {pos}")
-        # print(f" angles are: {self.state.angles}")
         return pos
 
     def local_joint_pos(self, joint):
@@ -119,13 +119,13 @@ class Robot(Agent):
         return dist <= grasp_range
 
 
-class Hierworld(World):
-    def __init__(self):
-        super(Hierworld, self).__init__()
-        self.roboworld = Robotworld()
-
-    def step(self): # do a step in roboworld while following masterpolicy
-        return None
+# class Hierworld(World):
+#     def __init__(self):
+#         super(Hierworld, self).__init__()
+#         self.roboworld = Robotworld()
+#
+#     def step(self): # do a step in roboworld while following masterpolicy
+#         return None
 
 
 class Robotworld(World):
@@ -143,7 +143,7 @@ class Robotworld(World):
         self.discrete_world = False
         # state resolution for discrete case
         self.resolution = None
-        #
+        # TODO: remove all
         # self.touched = False
 
     @property
@@ -157,11 +157,11 @@ class Robotworld(World):
                 self.update_object_state(agent, object, discrete=self.discrete_world)
             # self.update_world_state()
 
-    def update_world_state(self, threshold=0.10):
-        dist = np.linalg.norm(self.agents[0].position_end_effector() - self.agents[1].position_end_effector())
-        if dist < threshold:
-            # print(f'Robots kiss!')
-            self.touched = True
+    # def update_world_state(self, threshold=0.10):
+    #     dist = np.linalg.norm(self.agents[0].position_end_effector() - self.agents[1].position_end_effector())
+    #     if dist < threshold:
+    #         # print(f'Robots kiss!')
+    #         self.touched = True
 
     def update_agent_state(self, agent, discrete=False):
         if discrete and sum(agent.action.u) > 0.0:
@@ -184,7 +184,7 @@ class Robotworld(World):
         elif not discrete: # then continuous action space
             # change the agent state as influence of a step
             for i in range(len(agent.state.angles)):  # 2 when agent has 2 joints
-                agent.state.angles[i] += agent.action.u[i] * self.step_size
+                agent.state.angles[i] += agent.action.u[i] * self.step_size * agent.state.torq_dir
                 # make sure state stays within resolution
                 if agent.state.angles[i] > math.pi:
                     agent.state.angles[i] -= 2 * math.pi
@@ -354,12 +354,11 @@ class Robotworld(World):
     def invert_x(self):
         for agent in self.agents:
             agent.state.angles *= -1
+            agent.state.torq_dir *= -1
 
     def invert_y(self):
         for agent in self.agents:
             agent.state.angles[0] = np.pi - agent.state.angles[0]
             agent.state.angles[1] *= -1
-
-
-
-            # agent.state.angles = np.pi - agent.state.angles
+            # change action direction
+            agent.state.torq_dir *= -1
