@@ -29,6 +29,7 @@ def make_env(scenario_name, benchmark=False, discrete_action=False):
         .action_space       :   Returns the action space for each agent
         .n                  :   Returns the number of Agents
     '''
+    
     from robot.robot_environment import RobotEnv
     import robot.robot_scenarios as scenarios
 

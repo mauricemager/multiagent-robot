@@ -4,7 +4,7 @@ from multiagent.scenario import BaseScenario
 from robot.robot_core import Robot, Robotworld, Landmark
 
 # set random seed
-np.random.seed(2)
+# np.random.seed(2)
 
 class CollScenario(BaseScenario):
     """Define the parent collaborative scenario."""

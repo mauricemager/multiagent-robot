@@ -1,3 +1,5 @@
+#TODO: Clean up this code and put reference in
+
 #!/usr/bin/env python3
 import matplotlib.pyplot as plt
 import csv
@@ -142,23 +144,7 @@ def main(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, out_dir: str)
     plt.legend()
     plt.axis([0, 50000, -1.6, 0])
     plt.savefig("kaas.png")
-    # df = pd.read_csv("mse_data.csv")
-    # print(df)
-    #
-    # TSBOARD_SMOOTHING = [0.5, 0.85, 0.99]
-    #
-    # smooth = []
-    # for ts_factor in TSBOARD_SMOOTHING:
-    #     smooth.append(df.ewm(alpha=(1 - ts_factor)).mean())
-    #
-    # for ptx in range(3):
-    #     plt.subplot(1, 3, ptx + 1)
-    #     plt.plot(df["value"], alpha=0.4)
-    #     plt.plot(smooth[ptx]["value"])
-    #     plt.title("Tensorboard Smoothing = {}".format(TSBOARD_SMOOTHING[ptx]))
-    #     plt.grid(alpha=0.3)
-    #
-    # plt.show()
+
 
 if __name__ == "__main__":
     main()

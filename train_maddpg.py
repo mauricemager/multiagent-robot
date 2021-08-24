@@ -112,6 +112,7 @@ def run(config):
     # set seeds for generating random numbers according to config structure
     torch.manual_seed(config.seed)
     np.random.seed(config.seed)
+    print(f"config seed = {config.seed}")
     # alternative solution to use torch intraop parallelism on CPU if CUDA not available
     if not USE_CUDA:
         torch.set_num_threads(config.n_training_threads)
@@ -256,18 +257,18 @@ if __name__ == '__main__':
                         help="Name of directory to store " +
                              "model/training contents")
     parser.add_argument("--seed",
-                        default=1, type=int,
+                        default=3, type=int,
                         help="Random seed")
     parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=50000, type=int)
+    parser.add_argument("--n_episodes", default=20000, type=int)
     parser.add_argument("--episode_length", default=50, type=int)
     parser.add_argument("--steps_per_update", default=1000, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=50000, type=int)
+    parser.add_argument("--n_exploration_eps", default=20000, type=int)
     parser.add_argument("--init_noise_scale", default=1.0, type=float)
     parser.add_argument("--final_noise_scale", default=0.2, type=float)
     parser.add_argument("--save_interval", default=100, type=int)

@@ -34,9 +34,6 @@ class MLPNetwork(nn.Module):
         else:  # logits for discrete action (will softmax later)
             self.out_fn = lambda x: x
 
-        # self.noise_fc1 = torch.randn(self.fc1.weight.size()) * 0.1 + 0
-        # self.noise_fc2 = torch.randn(self.fc2.weight.size()) * 0.1 + 0
-        # self.noise_fc3 = torch.randn(self.fc3.weight.size()) * 0.1 + 0
 
 
     def forward(self, X):
