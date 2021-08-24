@@ -66,8 +66,8 @@ class CollScenario(BaseScenario):
             goal.color = np.array([1, 0, 0])
 
         # manual adjustments
-        world.agents[0].state.angles = np.array([np.pi/2, -np.pi/2])
-        world.agents[1].state.angles = np.array([np.pi/4, 0])
+        # world.agents[0].state.angles = np.array([np.pi/2, -np.pi/2])
+        # world.agents[1].state.angles = np.array([np.pi/4, 0])
 
     def reward(self, agent, world):
         """Reward function for total collaborative robotics task."""

@@ -137,6 +137,7 @@ def run(config):
     cmd = "tensorboard --logdir='models/" + config.env_id + \
           "/" + config.model_name + "/" + curr_run + "/logs'"
     Popen(cmd, shell=True)
+    print(cmd,'this is cmd')
     url = 'http://localhost:6006/'
     #TODO: still have to manually change this (should be taken from previous command)
 
@@ -260,15 +261,15 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=4, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=20000, type=int)
-    parser.add_argument("--episode_length", default=40, type=int)
+    parser.add_argument("--n_episodes", default=50000, type=int)
+    parser.add_argument("--episode_length", default=50, type=int)
     parser.add_argument("--steps_per_update", default=1000, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=15000, type=int)
+    parser.add_argument("--n_exploration_eps", default=50000, type=int)
     parser.add_argument("--init_noise_scale", default=1.0, type=float)
-    parser.add_argument("--final_noise_scale", default=0.4, type=float)
+    parser.add_argument("--final_noise_scale", default=0.2, type=float)
     parser.add_argument("--save_interval", default=100, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
     parser.add_argument("--lr", default=0.01, type=float) # increasing learning rate makes training slower, but increases training performance slightly

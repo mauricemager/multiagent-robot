@@ -8,15 +8,15 @@ from torch.autograd import Variable
 
 
 def run(config):
-    task1 = 'models/task1/june23/run1/model.pt'
-    task2 = 'models/task2/june23/run18/model.pt'
-    task3 = 'models/task3/june23/run3/model.pt'
-    task4 = 'models/task4/june24/run1/model.pt'
+    # task1 = 'models/task1/june23/run1/model.pt'
+    # task2 = 'models/task2/june23/run18/model.pt'
+    # task3 = 'models/task3/june23/run3/model.pt'
+    # task4 = 'models/task4/june24/run1/model.pt'
 
-    # task1 = 'trained_models/task1/model.pt'
-    # task2 = 'trained_models/task2/model.pt'
-    # task3 = 'trained_models/task3/model.pt'
-    # task4 = 'trained_models/task4/model.pt'
+    task1 = 'trained_models/task1/model.pt'
+    task2 = 'trained_models/task2/model.pt'
+    task3 = 'trained_models/task3/model.pt'
+    task4 = 'trained_models/task4/model.pt'
 
     task_paths = [task1, task2, task3, task4]
 
