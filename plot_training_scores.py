@@ -1,21 +1,14 @@
-#TODO: Clean up this code and put reference in
+#TODO: Clean up this code and put reference in (where from)
+
 
 #!/usr/bin/env python3
-import matplotlib.pyplot as plt
-import csv
 import glob
 import os
 import pprint
 import traceback
-import numpy as np
 import click
-import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
-
 import matplotlib.pyplot as plt
-import matplotlib.cbook as cbook
-
-import numpy as np
 import pandas as pd
 
 # Extraction function
@@ -114,24 +107,23 @@ def main(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, out_dir: str)
         os.makedirs(out_dir, exist_ok=True)
         if write_csv:
             print("saving to csv file")
-            out_file = os.path.join(out_dir, "all_training_logs_in_one_file.csv")
+            out_file = os.path.join(out_dir, "models/training_logs.csv")
             print(out_file)
             all_logs.to_csv(out_file, index=None)
         if write_pkl:
             print("saving to pickle file")
-            out_file = os.path.join(out_dir, "all_training_logs_in_one_file.pkl")
+            out_file = os.path.join(out_dir, "models/training_logs.pkl")
             print(out_file)
             all_logs.to_pickle(out_file)
     else:
         print("No event paths have been found.")
 
-    df = pd.read_csv("all_training_logs_in_one_file.csv")
+    df = pd.read_csv("models/training_logs.csv")
+    os.remove("models/training_logs.csv")
     # print("Contents in csv file:\n", df)
     x = df.step
     y = df.value
     # plt.plot(x, y)
-    # plt.show()
-    # fig = plt.figure()
     smooth = []
     smooth.append(df.ewm(alpha=0.05).mean())
     plt.plot(x, y, alpha=0.4, label='raw episode rewards')
@@ -143,7 +135,7 @@ def main(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, out_dir: str)
     plt.grid()
     plt.legend()
     plt.axis([0, 50000, -1.6, 0])
-    plt.savefig("kaas.png")
+    plt.savefig("models/kaas3   .png")
 
 
 if __name__ == "__main__":

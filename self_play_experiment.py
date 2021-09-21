@@ -1,6 +1,7 @@
-import argparse, time, torch, imageio
+# calculate scores for self-play experiment
+
+import torch
 import numpy as np
-from pathlib import Path
 from algorithms.maddpg import MADDPG
 from make_env import make_env
 from torch.autograd import Variable

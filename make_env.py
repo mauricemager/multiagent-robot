@@ -1,3 +1,5 @@
+# adapted for multi-agent robot
+
 """
 Code for creating a multiagent environment with one of the robot_scenarios listed
 in ./robot_scenarios/.

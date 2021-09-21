@@ -4,17 +4,15 @@ import time
 import os
 import imageio
 import numpy as np
-from gym.spaces import Box, Discrete
+from gym.spaces import Box
 from pathlib import Path
 from torch.autograd import Variable
 from tensorboardX import SummaryWriter
-# from utils.make_env import make_env
 from make_env import make_env
 from utils.buffer import ReplayBuffer
 from utils.env_wrappers import SubprocVecEnv, DummyVecEnv
 from algorithms.maddpg import MADDPG
 from subprocess import Popen
-import webbrowser
 
 # if installed, use coda for faster training through parallel computing
 USE_CUDA = torch.cuda.is_available()
