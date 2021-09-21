@@ -1,8 +1,20 @@
-from torch.distributions import Normal
+import torch
+from torch import Tensor, tensor
+from torch.autograd import Variable
 from torch.optim import Adam
 from .networks import MLPNetwork
 from .misc import hard_update, gumbel_softmax, onehot_from_logits
 from .noise import OUNoise
+from random import random, randint
+from torch.nn.functional import one_hot
+
+# ------------------ changes made to this file -----------------
+# imports
+from torch.distributions import Normal
+
+# self.step() changed to sample a action from distribution given by network
+# self.exploration removed OUNoise and introduced self.var line 45
+# added self.variance in self.scale2_noise() line 61
 
 class DDPGAgent(object):
     """
@@ -37,6 +49,7 @@ class DDPGAgent(object):
         self.critic_optimizer = Adam(self.critic.parameters(), lr=lr)
         if not discrete_action:
             self.exploration = OUNoise(num_out_pol)
+            # self.variance = 0.1
         else:
             self.exploration = 0.3  # epsilon for eps-greedy
         self.discrete_action = discrete_action
@@ -49,7 +62,16 @@ class DDPGAgent(object):
         if self.discrete_action:
             self.exploration = scale
         else:
-            self.exploration.scale = scale
+            # self.exploration.scale = scale
+            self.exploration.sigma = scale
+
+    # def get_action(self, obs, noise, exploration=False):
+    #     if exploration:
+    #         action = self.perturbed_policy(obs)
+    #         action += noise
+    #     else:
+    #         action = self.policy(obs)
+    #     return action
 
     def step(self, obs, explore=False):
         """
@@ -61,20 +83,53 @@ class DDPGAgent(object):
             action (PyTorch Variable): Actions for this agent
         """
         action = self.policy(obs)
+        # print(f"action first = {action}")
         if self.discrete_action:
             if explore:
-                action = gumbel_softmax(action, hard=True)
+                # action = onehot_from_logits(action, eps=self.exploration) # epsilon greedy exploration
+                action = gumbel_softmax(action, temperature=self.exploration, hard=True) # gumball softmax exploration
+                # print(f'action sample = {action}')
             else:
                 action = onehot_from_logits(action)
+
+            # if explore:
+            #     if random() > self.exploration: # do greedy action
+            #         action = onehot_from_logits(action)
+            #     else: # take random action
+            #         action = one_hot(tensor(randint(0, 5)), num_classes=6).unsqueeze(0).type(torch.float64)
+            # # old
+            # if explore:
+            #     action = gumbel_softmax(action, hard=True)
+            # else:
+            #     action = onehot_from_logits(action)
+
         else:  # continuous action
             if explore:
-                # modified for uncorrelated gaussian action sampling for exploration
+                # action += Variable(Tensor(self.exploration.noise()), requires_grad=False) # old
+                # print(f"action first = {action}")
+                # print(f" variance now = {self.exploration.sigma}")
                 dist = Normal(action, self.exploration.sigma)
                 action = dist.sample()
-                # action += Variable(Tensor(self.exploration.noise()),
-                #                    requires_grad=False)
-            action = action.clamp(-1, 1)
+                # print(f"action later = {action}")
+                action = action.clamp(-1, 1)
+                # print(action[:][:][-1])
+                # action[:, 2] = 1.0
+            # action[:][2] = 1.0
+            # print(f'ation = {action}')
         return action
+
+        # # print(f'exploration noise scale = {self.exploration.scale}')
+        # # print(f"self.exploration.scale = {self.exploration.scale}")
+        # network_output = self.policy(obs)
+        # dist = Normal(network_output, 0.001)
+        # action = dist.sample().clamp(-1, 1)
+        # # mu, sigma = split(network_output, 3, dim=1)
+        # # print(f"mu = {mu} and sigma = {sigma}")
+        # # if explore: sigma *= self.exploration.scale * 10
+        # # action = normal(mu, sigma).clamp(-1, 1)
+        # # print(action)
+        #
+        # return action
 
     def get_params(self):
         return {'policy': self.policy.state_dict(),

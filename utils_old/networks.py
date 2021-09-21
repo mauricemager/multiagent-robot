@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -33,6 +34,8 @@ class MLPNetwork(nn.Module):
         else:  # logits for discrete action (will softmax later)
             self.out_fn = lambda x: x
 
+
+
     def forward(self, X):
         """
         Inputs:
@@ -43,4 +46,31 @@ class MLPNetwork(nn.Module):
         h1 = self.nonlin(self.fc1(self.in_fn(X)))
         h2 = self.nonlin(self.fc2(h1))
         out = self.out_fn(self.fc3(h2))
+
+        # x = self.in_fn(X)
+        # x = self.fc1(x)
+        # self.fc1.weight = add_noise(self.fc1.weight)
+        # x = self.nonlin(x)
+        # x = self.fc2(x)
+        # self.fc2.weight = add_noise(self.fc2.weight)
+        # x = self.nonlin(x)
+        # x = self.fc3(x)
+        # self.fc3.weight = add_noise(self.fc3.weight)
+        # out = self.out_fn(x)
+
         return out
+
+def add_noise(weights):
+    noise = torch.randn(nn.Parameter(weights).size()) * 0.1 + 0
+    # print(f" noise sample = {noise}")
+    noise = noise.to(device=weights.device)
+    with torch.no_grad():
+        weight_noise = nn.Parameter(weights + noise)
+    return weight_noise
+
+# def add_noise(weights):
+#     noise = torch.randn(weights.size()) * 0.1 + 0
+#     noise = noise.to(device=weights.device)
+#     with torch.no_grad():
+#         weights.add_(noise)
+#     return weights
