@@ -41,11 +41,11 @@ class Landmark(Entity):
         return points + self.state.p_pos
 
 
-class Hieragent(Agent):
-    def __init__(self):
-        super().__init__()
-        # state of sub policy
-        self.sub_pol = None
+# class Hieragent(Agent):
+#     def __init__(self):
+#         super().__init__()
+#         # state of sub policy
+#         self.sub_pol = None
 
 
 class Robot(Agent):
@@ -209,7 +209,6 @@ class Robotworld(World):
                 if self.object_grabbable(agent, object):
                     object.state.grabbed = True
                     object.state.who_grabbed = agent.name
-                    print(f'You should now be grabbing!!')
                 agent.state.grasp = True
             elif action == 5:
                 agent.state.grasp = False

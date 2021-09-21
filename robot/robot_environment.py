@@ -1,7 +1,7 @@
 from multiagent.multi_discrete import MultiDiscrete
 from multiagent.environment import MultiAgentEnv
 import numpy as np
-from robot.robot_core import Hieragent
+# from robot.robot_core import Hieragent
 
 # environment for all agents in the multiagent world
 class RobotEnv(MultiAgentEnv):

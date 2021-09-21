@@ -287,7 +287,7 @@ if __name__ == '__main__':
     parser.add_argument("--save_gifs", default=True,
                         action="store_true",
                         help="Saves gif of each episode into model directory")
-    parser.add_argument("--n_evaluations", default=10, type=int)
+    parser.add_argument("--n_evaluations", default=2, type=int)
     parser.add_argument("--fps", default=30, type=int)
 
     config = parser.parse_args()

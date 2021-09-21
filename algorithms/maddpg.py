@@ -286,6 +286,17 @@ class MADDPG(object):
         save_dict = torch.load(filename)
         instance = cls(**save_dict['init_dict'])
         instance.init_dict = save_dict['init_dict']
+        kaas = save_dict['agent_params'][0]
         for a, params in zip(instance.agents, save_dict['agent_params']):
             a.load_params(params)
+        return instance
+
+    @classmethod
+    def init_2_from_save(cls, file1, file2):
+        save1 = torch.load(file1)
+        save2 = torch.load(file2)
+        instance = cls(**save1['init_dict'])
+        instance.init_dict = save1['init_dict']
+        instance.agents[0].load_params(save1['agent_params'][0])
+        instance.agents[1].load_params(save2['agent_params'][1])
         return instance
